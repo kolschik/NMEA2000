@@ -712,9 +712,9 @@ tNMEA2000::tNMEA2000() {
   N2kCANMsgBuf=0;
   MaxN2kCANMsgs=0;
 
-  MaxCANSendFrames=40;
+  MaxCANSendFrames=sizeof(CANSendFrameBuf)/sizeof(CANSendFrameBuf[0]);
   MaxCANReceiveFrames=0; // Use driver default
-  CANSendFrameBuf=0;
+  memset(CANSendFrameBuf, 0, sizeof(CANSendFrameBuf));
 
   OnOpen=0;
   MsgHandler=0;
@@ -1226,13 +1226,8 @@ void tNMEA2000::SetMode(tN2kMode _N2kMode, uint8_t _N2kSource) {
 
 //*****************************************************************************
 void tNMEA2000::InitCANFrameBuffers() {
-    if ( CANSendFrameBuf==0 && !IsInitialized() ) {
-      if ( MaxCANSendFrames>0 ) CANSendFrameBuf = new tCANSendFrame[MaxCANSendFrames];
-      N2kDbg("Initialize frame buffer. Size: "); N2kDbg(MaxCANSendFrames); N2kDbg(", address:"); N2kDbgln((uint32_t)CANSendFrameBuf);
       CANSendFrameBufferWrite=0;
-      CANSendFrameBufferRead=0;
-    }
-
+      CANSendFrameBufferRead=0; 
     // Receive buffer has sense only with interrupt handling. So it must be handled on inherited class.
 }
 
@@ -1356,15 +1351,13 @@ unsigned long N2ktoCanID(unsigned char priority, unsigned long PGN, unsigned lon
 
 //*****************************************************************************
 bool tNMEA2000::SendFrames()
-{ uint16_t temp;
-
-  if ( CANSendFrameBuf==0 ) return true; // This can be in case, where inherited class defines own buffering.
+{ 
+  uint16_t temp;
 
   while (CANSendFrameBufferRead!=CANSendFrameBufferWrite) {
     temp = (CANSendFrameBufferRead + 1) % MaxCANSendFrames;
     if ( CANSendFrame(CANSendFrameBuf[temp].id, CANSendFrameBuf[temp].len, CANSendFrameBuf[temp].buf, CANSendFrameBuf[temp].wait_sent) ) {
       CANSendFrameBufferRead=temp;
-      N2kFrameOutDbgStart("Frame unbuffered "); N2kFrameOutDbgln(CANSendFrameBuf[temp].id);
     } else return false;
   }
 
@@ -1377,7 +1370,7 @@ bool tNMEA2000::SendFrame(unsigned long id, unsigned char len, const unsigned ch
   if ( !SendFrames() || !CANSendFrame(id,len,buf,wait_sent) ) { // If we can not sent frame immediately, add it to buffer
     tCANSendFrame *Frame=GetNextFreeCANSendFrame();
     if ( Frame==0 ) {
-      N2kFrameOutDbgStart("Frame failed "); N2kFrameOutDbgln(id);
+      //N2kFrameOutDbgStart("Frame failed "); N2kFrameOutDbgln(id);
       return false;
     }
     len=N2kMin<unsigned char>(len,8);
@@ -1385,7 +1378,7 @@ bool tNMEA2000::SendFrame(unsigned long id, unsigned char len, const unsigned ch
     Frame->len=len;
     Frame->wait_sent=wait_sent;
     for (int i=0; i<len; i++) Frame->buf[i]=buf[i];
-    N2kFrameOutDbgStart("Frame buffered "); N2kFrameOutDbgln(id);
+    //N2kFrameOutDbgStart("Frame buffered "); N2kFrameOutDbgln(id);
   }
 
   return true;
@@ -1455,8 +1448,6 @@ void tNMEA2000::SendHeartbeat(bool force) {
 
 //*****************************************************************************
 tNMEA2000::tCANSendFrame *tNMEA2000::GetNextFreeCANSendFrame() {
-  if (CANSendFrameBuf==0) return 0;
-
   uint16_t temp = (CANSendFrameBufferWrite + 1) % MaxCANSendFrames;
 
   if (temp != CANSendFrameBufferRead) {
@@ -2032,7 +2023,7 @@ uint8_t tNMEA2000::SetN2kCANBufMsg(unsigned long canId, unsigned char len, unsig
       KnownMessage=CheckKnownMessage(PGN,SystemMessage,FastPacket);
       if ( KnownMessage || !HandleOnlyKnownMessages() ) {
         if (FastPacket && !IsFastPacketFirstFrame(buf[0]) ) { // Not first frame
-        N2kFrameInDbgStart("New frame="); N2kFrameInDbg(PGN); N2kFrameInDbg(" frame="); N2kFrameInDbg(buf[0],HEX); N2kFrameInDbgln();
+//        N2kFrameInDbgStart("New frame="); N2kFrameInDbg(PGN); N2kFrameInDbg(" frame="); N2kFrameInDbg(buf[0],HEX); N2kFrameInDbgln();
           // Find previous slot for this PGN
           for (MsgIndex=0;
                MsgIndex<MaxN2kCANMsgs &&

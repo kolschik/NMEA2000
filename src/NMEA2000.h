@@ -1032,7 +1032,7 @@ protected:
      * 
      * \ref InitCANFrameBuffers(). 
     */
-    tCANSendFrame *CANSendFrameBuf;
+    tCANSendFrame CANSendFrameBuf[32];
     /** \brief Size of CANSendFrameBuf or before initialization requested
      *         total frame buffering size.
      * 

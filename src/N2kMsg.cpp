@@ -861,21 +861,6 @@ void PrintBuf(N2kStream *port, unsigned char len, const unsigned char *pData, bo
   if (AddLF) port->println(F(""));
 }
 
-//*****************************************************************************
-void tN2kMsg::Print(N2kStream *port, bool NoData) const {
-  if (port==0 || !IsValid()) return;
-  port->print(N2kMillis()); port->print(F(" : "));
-  port->print(F("Pri:")); port->print(Priority);
-  port->print(F(" PGN:")); port->print(PGN);
-  port->print(F(" Source:")); port->print(Source);
-  port->print(F(" Dest:")); port->print(Destination);
-  port->print(F(" Len:")); port->print(DataLen);
-  if (!NoData) {
-    port->print(F(" Data:"));
-    PrintBuf(port,DataLen,Data);
-  }
-  port->println(F(""));
-}
 
 //*****************************************************************************
 void AddByteEscapedToBuf(unsigned char byteToAdd, uint8_t &idx, unsigned char *buf, int &byteSum)
@@ -886,54 +871,4 @@ void AddByteEscapedToBuf(unsigned char byteToAdd, uint8_t &idx, unsigned char *b
   if (byteToAdd == Escape) {
     buf[idx++]=Escape;
   }
-}
-
-//*****************************************************************************
-// Actisense Format:
-// <10><02><93><length (1)><priority (1)><PGN (3)><destination (1)><source (1)><time (4)><len (1)><data (len)><CRC (1)><10><03>
-void tN2kMsg::SendInActisenseFormat(N2kStream *port) const {
-  unsigned long _PGN=PGN;
-  unsigned long _MsgTime=MsgTime;
-  uint8_t msgIdx=0;
-  int byteSum = 0;
-  uint8_t CheckSum;
-  unsigned char ActisenseMsgBuf[MaxActisenseMsgBuf];
-
-  if (port==0 || !IsValid()) return;
-  // Serial.print("freeMemory()="); Serial.println(freeMemory());
-
-  ActisenseMsgBuf[msgIdx++]=Escape;
-  ActisenseMsgBuf[msgIdx++]=StartOfText;
-  AddByteEscapedToBuf(MsgTypeN2k,msgIdx,ActisenseMsgBuf,byteSum);
-  AddByteEscapedToBuf(DataLen+11,msgIdx,ActisenseMsgBuf,byteSum); //length does not include escaped chars
-  AddByteEscapedToBuf(Priority,msgIdx,ActisenseMsgBuf,byteSum);
-  AddByteEscapedToBuf(_PGN & 0xff,msgIdx,ActisenseMsgBuf,byteSum); _PGN>>=8;
-  AddByteEscapedToBuf(_PGN & 0xff,msgIdx,ActisenseMsgBuf,byteSum); _PGN>>=8;
-  AddByteEscapedToBuf(_PGN & 0xff,msgIdx,ActisenseMsgBuf,byteSum);
-  AddByteEscapedToBuf(Destination,msgIdx,ActisenseMsgBuf,byteSum);
-  AddByteEscapedToBuf(Source,msgIdx,ActisenseMsgBuf,byteSum);
-  // Time?
-  AddByteEscapedToBuf(_MsgTime & 0xff,msgIdx,ActisenseMsgBuf,byteSum); _MsgTime>>=8;
-  AddByteEscapedToBuf(_MsgTime & 0xff,msgIdx,ActisenseMsgBuf,byteSum); _MsgTime>>=8;
-  AddByteEscapedToBuf(_MsgTime & 0xff,msgIdx,ActisenseMsgBuf,byteSum); _MsgTime>>=8;
-  AddByteEscapedToBuf(_MsgTime & 0xff,msgIdx,ActisenseMsgBuf,byteSum);
-  AddByteEscapedToBuf(DataLen,msgIdx,ActisenseMsgBuf,byteSum);
-
-
-  for (int i = 0; i < DataLen; i++) AddByteEscapedToBuf(Data[i],msgIdx,ActisenseMsgBuf,byteSum);
-  byteSum %= 256;
-
-  CheckSum = (uint8_t)((byteSum == 0) ? 0 : (256 - byteSum));
-  ActisenseMsgBuf[msgIdx++]=CheckSum;
-  if (CheckSum==Escape) ActisenseMsgBuf[msgIdx++]=CheckSum;
-
-  ActisenseMsgBuf[msgIdx++] = Escape;
-  ActisenseMsgBuf[msgIdx++] = EndOfText;
-
-//  if ( port->availableForWrite()>msgIdx ) {  // 16.7.2017 did not work yet
-    port->write(ActisenseMsgBuf,msgIdx);
-//  }
-    //Serial.print("Actisense data:");
-    //PrintBuf(msgIdx,ActisenseMsgBuf);
-    //Serial.print("\r\n");
 }

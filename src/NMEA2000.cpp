@@ -29,94 +29,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <string.h>
 #include <stdlib.h>
 
-// #define DebugStream Serial   // outputs debug messages to the serial console (only for Arduino)
-#define DebugStream (*ForwardStream) // outputs debug messages to same destination as ForwardStream
 
-// #define NMEA2000_FRAME_ERROR_DEBUG
-// #define NMEA2000_FRAME_IN_DEBUG
-// #define NMEA2000_FRAME_OUT_DEBUG
-// #define NMEA2000_MSG_TX_DEBUG
-// #define NMEA2000_MSG_RX_DEBUG  // This one spams the console with every parsed message
-// #define NMEA2000_BUF_DEBUG
-// #define NMEA2000_DEBUG
-
-#if defined(NMEA2000_FRAME_ERROR_DEBUG)
-# define N2kFrameErrDbgStart(fmt, args...) DebugStream.print(N2kMillis()); DebugStream.print(": "); DebugStream.print (fmt , ## args)
-# define N2kFrameErrDbg(fmt, args...)     DebugStream.print (fmt , ## args)
-# define N2kFrameErrDbgln(fmt, args...)   DebugStream.println (fmt , ## args)
-#else
-# define N2kFrameErrDbgStart(fmt, args...)
-# define N2kFrameErrDbg(fmt, args...)
-# define N2kFrameErrDbgln(fmt, args...)
-#endif
-
-#if defined(NMEA2000_FRAME_IN_DEBUG)
-# define N2kFrameInDbgStart(fmt, args...) DebugStream.print(N2kMillis()); DebugStream.print(": "); DebugStream.print (fmt , ## args)
-# define N2kFrameInDbg(fmt, args...)     DebugStream.print (fmt , ## args)
-# define N2kFrameInDbgln(fmt, args...)   DebugStream.println (fmt , ## args)
-#else
-# define N2kFrameInDbgStart(fmt, args...)
-# define N2kFrameInDbg(fmt, args...)
-# define N2kFrameInDbgln(fmt, args...)
-#endif
-
-#if defined(NMEA2000_FRAME_OUT_DEBUG)
-# define N2kFrameOutDbgStart(fmt, args...) DebugStream.print(N2kMillis()); DebugStream.print(": "); DebugStream.print (fmt , ## args)
-# define N2kFrameOutDbg(fmt, args...)     DebugStream.print (fmt , ## args)
-# define N2kFrameOutDbgln(fmt, args...)   DebugStream.println (fmt , ## args)
-#else
-# define N2kFrameOutDbgStart(fmt, args...)
-# define N2kFrameOutDbg(fmt, args...)
-# define N2kFrameOutDbgln(fmt, args...)
-#endif
-
-#if defined(NMEA2000_MSG_TX_DEBUG)
-# define N2kMsgDbgStart(fmt, args...) DebugStream.print(N2kMillis()); DebugStream.print(": "); DebugStream.print (fmt , ## args)
-# define N2kMsgDbg(fmt, args...)     DebugStream.print (fmt , ## args)
-# define N2kMsgDbgln(fmt, args...)   DebugStream.println (fmt , ## args)
-#else
-# define N2kMsgDbgStart(fmt, args...)
-# define N2kMsgDbg(fmt, args...)
-# define N2kMsgDbgln(fmt, args...)
-#endif
-
-#if defined(NMEA2000_MSG_RX_DEBUG)
-# define N2kMsgRxDbgStart(fmt, args...) DebugStream.print(N2kMillis()); DebugStream.print(": "); DebugStream.print (fmt , ## args)
-# define N2kMsgRxDbg(fmt, args...)     DebugStream.print (fmt , ## args)
-# define N2kMsgRxDbgln(fmt, args...)   DebugStream.println (fmt , ## args)
-#else
-# define N2kMsgRxDbgStart(fmt, args...)
-# define N2kMsgRxDbg(fmt, args...)
-# define N2kMsgRxDbgln(fmt, args...)
-#endif
-
-#if defined(NMEA2000_BUF_DEBUG)
-# define DbgPrintBuf(len, buf, addln)     PrintBuf(&DebugStream, len, buf, addln)
-#else
-# define DbgPrintBuf(len, buf, addln)
-#endif
-
-#if defined(NMEA2000_DEBUG)
-# define N2kDbg(fmt, args...)     DebugStream.print (fmt , ## args)
-# define N2kDbgln(fmt, args...)   DebugStream.println (fmt , ## args)
-#else
-# define N2kDbg(fmt, args...)
-# define N2kDbgln(fmt, args...)
-#endif
-
-// #define NMEA2000_MEMORY_TEST 1
-
-#if defined(NMEA2000_MEMORY_TEST)
-#include <MemoryFree.h>
-
-void N2kPrintFreeMemory(const char *Source) {
-    Serial.print(Source);
-    Serial.print(", free memory=");
-    Serial.println(freeMemory());
-}
-#else
-#define N2kPrintFreeMemory(a)
-#endif
 
 /** \brief Timeout value for the ISO Address Claim in ms*/
 #define N2kAddressClaimTimeout 250
@@ -712,7 +625,7 @@ tNMEA2000::tNMEA2000() {
   N2kCANMsgBuf=0;
   MaxN2kCANMsgs=0;
 
-  MaxCANSendFrames=sizeof(CANSendFrameBuf)/sizeof(CANSendFrameBuf[0]);
+  MaxCANSendFrames=(sizeof(CANSendFrameBuf)/sizeof(CANSendFrameBuf[0]))/2;
   MaxCANReceiveFrames=0; // Use driver default
   memset(CANSendFrameBuf, 0, sizeof(CANSendFrameBuf));
 
@@ -727,11 +640,7 @@ tNMEA2000::tNMEA2000() {
   DeviceInformationChanged=false;
   dbMode=dm_None;
   N2kMode=N2km_ListenOnly;
-  ForwardType=fwdt_Actisense;
-  ForwardMode=0;
-  EnableForward();
-  SetForwardSystemMessages();
-  SetForwardOwnMessages();
+
   LocalConfigurationInformationData=0;
   SetProgmemConfigurationInformation(DefManufacturerInformation,
                                      DefInstallationDescription1,
@@ -743,14 +652,13 @@ tNMEA2000::tNMEA2000() {
 //*****************************************************************************
 void tNMEA2000::SetDeviceCount(const uint8_t _DeviceCount) {
   // Note that we can set this only before any initialization. Limit count to 10.
-  if ( Devices==0 && _DeviceCount>=1 && _DeviceCount<10 ) DeviceCount=_DeviceCount;
+  if ( Devices==0 && _DeviceCount>=1 && _DeviceCount<3 ) DeviceCount=_DeviceCount;
 }
 
 //*****************************************************************************
 void tNMEA2000::InitDevices() {
   if ( Devices==0 ) {
-    N2kDbgln("Init devices");
-    Devices=new tInternalDevice[DeviceCount];
+    Devices = Devices_buf;
     MaxCANSendFrames*=DeviceCount; // We need bigger buffer for sending all information
 //    for (int i=0; i<DeviceCount; i++) Devices[i].tDevice();
     // We set default device information here.
@@ -1261,14 +1169,11 @@ bool tNMEA2000::Open() {
 
   if ( OpenState==os_OpenCAN ) {
     if ( !OpenScheduler.IsTime() ) return false;
-    bool Notify=( (ForwardStream!=0) && (ForwardType==tNMEA2000::fwdt_Text) );
     if ( (dbMode!=dm_None) || CANOpen() ) {
       OpenState=os_WaitOpen;
       OpenScheduler.FromNow(200);
-      if ( Notify ) ForwardStream->println(F("CAN device ready"));
     } else { // Open failed, delay next open
       OpenScheduler.FromNow(1000);
-      if ( Notify ) ForwardStream->println(F("CAN device failed to open"));
     }
     return OpenState==os_WaitOpen;
   }
@@ -1506,15 +1411,10 @@ bool tNMEA2000::SendMsg(const tN2kMsg &N2kMsg, int DeviceIndex) {
 
   switch (dbMode) {
     case dm_None:
-      N2kMsgDbgStart("Send PGN:"); N2kMsgDbgln(N2kMsg.PGN);
-      N2kMsgDbgStart(" - can ID:"); N2kMsgDbgln(canId);
       if ( IsAddressClaimStarted(DeviceIndex) && N2kMsg.PGN!=N2kPGNIsoAddressClaim ) return false;
 
       if (N2kMsg.DataLen<=8 && !IsFastPacket(N2kMsg) ) { // We can send single frame
-          DbgPrintBuf(N2kMsg.DataLen, N2kMsg.Data,true);
           result=SendFrame(canId, N2kMsg.DataLen, N2kMsg.Data,false);
-          if (!result && ForwardStream!=0 && ForwardType==tNMEA2000::fwdt_Text) { ForwardStream->print(F("PGN ")); ForwardStream->print(N2kMsg.PGN); ForwardStream->println(F(" send failed")); }
-          N2kPrintFreeMemory("SendMsg, single frame");
       } else { // Send it as fast packet in multiple frames
 #if !defined(N2K_NO_ISO_MULTI_PACKET_SUPPORT)
         if ( N2kMsg.IsTPMessage() ) {
@@ -1536,7 +1436,6 @@ bool tNMEA2000::SendMsg(const tN2kMsg &N2kMsg, int DeviceIndex) {
                        temp[j]=N2kMsg.Data[cur];
                        cur++;
                    }
-                  N2kPrintFreeMemory("SendMsg, fastpacket");
               } else {
                    int j=1;
                    //send the next 7 data bytes
@@ -1549,25 +1448,10 @@ bool tNMEA2000::SendMsg(const tN2kMsg &N2kMsg, int DeviceIndex) {
                    }
               }
 
-              DbgPrintBuf(8,temp,true);
               result=SendFrame(canId, 8, temp, true);
-              if (!result && ForwardStream!=0 && ForwardType==tNMEA2000::fwdt_Text) {
-                ForwardStream->print(F("PGN ")); ForwardStream->print(N2kMsg.PGN);
-                ForwardStream->print(F(", frame:")); ForwardStream->print(i); ForwardStream->print(F("/")); ForwardStream->print(frames);
-                ForwardStream->println(F(" send failed"));
-              }
           }
         }
       };
-      if ( ForwardOwnMessages() ) ForwardMessage(N2kMsg);
-      break;
-    case dm_ClearText:
-      result=true;
-      N2kMsg.Print(ForwardStream);
-      break;
-    case dm_Actisense:
-      result=true;
-      N2kMsg.SendInActisenseFormat(ForwardStream);
       break;
   }
 
@@ -1828,7 +1712,6 @@ bool tNMEA2000::TestHandleTPMessage(unsigned long PGN, unsigned char Source, uns
     switch (TP_CM_Control) {
       case TP_CM_BAM:
       case TP_CM_RTS: {
-        N2kMsgDbgln("Got TP Command");
         Index=1;
         uint16_t nBytes=GetBuf2ByteUInt(Index,buf);
         uint8_t TPMaxPackets=buf[Index++];
@@ -1837,12 +1720,10 @@ bool tNMEA2000::TestHandleTPMessage(unsigned long PGN, unsigned char Source, uns
         FindFreeCANMsgIndex(TransportPGN,Source,Destination,true,MsgIndex);
 
         if (MsgIndex==MaxN2kCANMsgs) { // No free msg place
-          N2kMsgDbgStart("No free msg slot"); N2kMsgDbgln();
           if ( (TP_CM_Control==TP_CM_RTS) && (iDev>=0) ) { // If it was for us and not broadcast, we need to abort transport
             SendTPCM_Abort(TransportPGN,Source,iDev,TP_CM_AbortBusy);
           }
         } else { // Start transport
-          N2kMsgDbgStart("Use msg slot: "); N2kMsgDbgln(MsgIndex);
           bool FastPacket;
           N2kCANMsgBuf[MsgIndex].KnownMessage=CheckKnownMessage(TransportPGN,N2kCANMsgBuf[MsgIndex].SystemMessage,FastPacket);
           if ( nBytes < tN2kMsg::MaxDataLen &&  // Currently we can handle only tN2kMsg::MaxDataLen long messages
@@ -1870,7 +1751,6 @@ bool tNMEA2000::TestHandleTPMessage(unsigned long PGN, unsigned char Source, uns
       }
       case TP_CM_CTS:
         if ( !IsValidDevice(iDev) ) break; // Should never fail
-        N2kMsgDbgStart("Got TP CTS"); N2kMsgDbgln(MsgIndex);
         if ( IsBroadcast(Devices[iDev].PendingTPMsg.Destination) ) break; // We should not get controls for broadcast TP msg
         if ( Devices[iDev].PendingTPMsg.PGN!=TransportPGN ) { // Some failure on communication
           EndSendTPMessage(iDev); // Should we retry from beginning?
@@ -1891,13 +1771,11 @@ bool tNMEA2000::TestHandleTPMessage(unsigned long PGN, unsigned char Source, uns
         break;
       case TP_CM_ACK:
         if ( !IsValidDevice(iDev) ) break; // Should never fail
-        N2kMsgDbgStart("Got TP ACK"); N2kMsgDbgln(MsgIndex);
         if ( IsBroadcast(Devices[iDev].PendingTPMsg.Destination) ) break; // We should not get controls for broadcast TP msg
         EndSendTPMessage(iDev);
         break;
       case TP_CM_Abort:
         if ( !IsValidDevice(iDev) ) break; // Should never fail
-        N2kMsgDbgStart("Got TP Abort"); N2kMsgDbgln(MsgIndex);
         if ( IsBroadcast(Devices[iDev].PendingTPMsg.Destination) ) break; // We should not get controls for broadcast TP msg
         EndSendTPMessage(iDev);
         break;
@@ -1907,7 +1785,6 @@ bool tNMEA2000::TestHandleTPMessage(unsigned long PGN, unsigned char Source, uns
     MsgIndex=MaxN2kCANMsgs;  // After TP_CM, message is newer ready.
     return true;
   } else if ( PGN==TP_DT ) { // Datapacket
-    N2kMsgDbgStart("Got TP data"); N2kMsgDbgln(MsgIndex);
     // So we need to find TP msg which sender and destination matches.
     for (MsgIndex=0;
          MsgIndex<MaxN2kCANMsgs &&
@@ -1920,7 +1797,6 @@ bool tNMEA2000::TestHandleTPMessage(unsigned long PGN, unsigned char Source, uns
     // if (MsgIndex==MaxN2kCANMsgs) N2kMsgDbgln("TP data msg not found");
     // for (int i=1; i<len; i++) N2kMsgDbgln(buf[i]);
     if (MsgIndex<MaxN2kCANMsgs) { // found TP message under reception
-      N2kMsgDbgStart("Use msg slot: "); N2kMsgDbgln(MsgIndex);
       if (N2kCANMsgBuf[MsgIndex].LastFrame+1 == buf[0]) { // Right packet is coming
         // Add packet to the message
         CopyBufToCANMsg(N2kCANMsgBuf[MsgIndex],1,len,buf);
@@ -1938,7 +1814,6 @@ bool tNMEA2000::TestHandleTPMessage(unsigned long PGN, unsigned char Source, uns
           }
         }
       } else { // Wrong packet - either we lost packet or sender sends wrong, so free this
-        N2kMsgDbgStart("Invalid packet: "); N2kMsgDbgln(buf[0]);
         if ( N2kCANMsgBuf[MsgIndex].TPRequireCTS>0 && iDev>=0 ) { // We need to abort transport
           SendTPCM_Abort(N2kCANMsgBuf[MsgIndex].N2kMsg.PGN,Source,iDev,TP_CM_AbortTimeout);  // Abort transport
         }
@@ -2023,7 +1898,6 @@ uint8_t tNMEA2000::SetN2kCANBufMsg(unsigned long canId, unsigned char len, unsig
       KnownMessage=CheckKnownMessage(PGN,SystemMessage,FastPacket);
       if ( KnownMessage || !HandleOnlyKnownMessages() ) {
         if (FastPacket && !IsFastPacketFirstFrame(buf[0]) ) { // Not first frame
-//        N2kFrameInDbgStart("New frame="); N2kFrameInDbg(PGN); N2kFrameInDbg(" frame="); N2kFrameInDbg(buf[0],HEX); N2kFrameInDbgln();
           // Find previous slot for this PGN
           for (MsgIndex=0;
                MsgIndex<MaxN2kCANMsgs &&
@@ -2035,19 +1909,14 @@ uint8_t tNMEA2000::SetN2kCANBufMsg(unsigned long canId, unsigned char len, unsig
                 );
                MsgIndex++);
           if (MsgIndex<MaxN2kCANMsgs) { // we found start for this message, so add data to it.
-            N2kMsgRxDbgStart("Use msg slot: "); N2kMsgRxDbgln(MsgIndex);
             if (N2kCANMsgBuf[MsgIndex].LastFrame+1 == buf[0]) { // Right frame is coming
               N2kCANMsgBuf[MsgIndex].LastFrame=buf[0];
               CopyBufToCANMsg(N2kCANMsgBuf[MsgIndex],1,len,buf);
             } else { // We have lost frame, so free this
-              N2kFrameErrDbgStart("Lost frame ");  N2kFrameErrDbg(N2kCANMsgBuf[MsgIndex].LastFrame); N2kFrameErrDbg("/");  N2kFrameErrDbg(buf[0]);
-              N2kFrameErrDbg(", source ");  N2kFrameErrDbg(Source); N2kFrameErrDbg(" for: "); N2kFrameErrDbgln(PGN);
               N2kCANMsgBuf[MsgIndex].FreeMessage();
               MsgIndex=MaxN2kCANMsgs;
             }
           } else {  // Orphan frame
-              N2kFrameErrDbgStart("Orphan frame "); N2kFrameErrDbg(buf[0]); N2kFrameErrDbg(", source ");
-              N2kFrameErrDbg(Source); N2kFrameErrDbg(" for: "); N2kFrameErrDbgln(PGN);
           }
         } else { // Handle first frame
 #if !defined(N2K_NO_ISO_MULTI_PACKET_SUPPORT)
@@ -2056,7 +1925,6 @@ uint8_t tNMEA2000::SetN2kCANBufMsg(unsigned long canId, unsigned char len, unsig
           FindFreeCANMsgIndex(PGN,Source,Destination,MsgIndex);
 #endif
           if ( MsgIndex<MaxN2kCANMsgs ) { // we found free place, so handle frame
-            N2kMsgRxDbgStart("Use msg slot: "); N2kMsgRxDbgln(MsgIndex);
             N2kCANMsgBuf[MsgIndex].FreeMsg=false;
             N2kCANMsgBuf[MsgIndex].KnownMessage=KnownMessage;
             N2kCANMsgBuf[MsgIndex].SystemMessage=SystemMessage;
@@ -2067,12 +1935,10 @@ uint8_t tNMEA2000::SetN2kCANBufMsg(unsigned long canId, unsigned char len, unsig
             N2kCANMsgBuf[MsgIndex].CopiedLen=0;
             if (FastPacket) {
               CopyBufToCANMsg(N2kCANMsgBuf[MsgIndex],2,len,buf);
-              N2kFrameInDbgStart("First frame="); N2kFrameInDbg(PGN);  N2kFrameInDbgln();
               N2kCANMsgBuf[MsgIndex].LastFrame=buf[0];
               N2kCANMsgBuf[MsgIndex].N2kMsg.DataLen=buf[1];
             } else {
               CopyBufToCANMsg(N2kCANMsgBuf[MsgIndex],0,len,buf);
-              N2kFrameInDbgStart("Single frame="); N2kFrameInDbg(PGN); N2kFrameInDbgln();
               N2kCANMsgBuf[MsgIndex].LastFrame=0;
               N2kCANMsgBuf[MsgIndex].N2kMsg.DataLen=len;
             }
@@ -2105,24 +1971,6 @@ bool tNMEA2000::IsMySource(unsigned char Source) {
     return (FindSourceDeviceIndex(Source)!=-1);
 }
 
-//*****************************************************************************
-void tNMEA2000::ForwardMessage(const tN2kMsg &N2kMsg) {
-  if ( !ForwardEnabled() || ( !( ForwardOwnMessages() && IsMySource(N2kMsg.Source) ) && N2kMode==N2km_NodeOnly ) ) return;
-
-  switch (ForwardType) {
-    case fwdt_Actisense:
-      N2kMsg.SendInActisenseFormat(ForwardStream);
-      break;
-    case fwdt_Text:
-      N2kMsg.Print(ForwardStream);
-      break;
-  }
-}
-
-//*****************************************************************************
-void tNMEA2000::ForwardMessage(const tN2kCANMsg &N2kCanMsg) {
-  if ( N2kCanMsg.KnownMessage || !ForwardOnlyKnownMessages() ) ForwardMessage(N2kCanMsg.N2kMsg);
-}
 
 //*****************************************************************************
 void tNMEA2000::SendIsoAddressClaim(unsigned char Destination, int DeviceIndex, unsigned long FromNow) {
@@ -2374,7 +2222,6 @@ void tNMEA2000::HandleISORequest(const tN2kMsg &N2kMsg) {
     if ( !tNMEA2000::IsBroadcast(N2kMsg.Destination) && iDev==-1) return; // if destination is not for us, we do nothing
 
     ParseN2kPGNISORequest(N2kMsg,RequestedPGN);
-    N2kMsgDbgStart("ISO request: "); N2kMsgDbgln(RequestedPGN);
     if (tNMEA2000::IsBroadcast(N2kMsg.Destination)) { // broadcast -> respond from all devices
       for (iDev=0; iDev<DeviceCount; iDev++) RespondISORequest(N2kMsg,false,RequestedPGN,iDev);
     } else {
@@ -2417,7 +2264,6 @@ void tNMEA2000::HandleGroupFunction(const tN2kMsg &N2kMsg) {
     if ( !tNMEA2000::IsBroadcast(N2kMsg.Destination) && iDev==-1) return; // if destination is not for us, we do nothing
 
     if (!tN2kGroupFunctionHandler::Parse(N2kMsg,GroupFunctionCode,PGNForGroupFunction)) return;
-    N2kMsgDbgStart("Group function: "); N2kMsgDbgln(PGNForGroupFunction);
     if ( tNMEA2000::IsBroadcast(N2kMsg.Destination) ) { // broadcast -> respond from all devices
       for (iDev=0; iDev<DeviceCount; iDev++) RespondGroupFunction(N2kMsg,GroupFunctionCode,PGNForGroupFunction,iDev);
     } else {
@@ -2430,10 +2276,6 @@ void tNMEA2000::HandleGroupFunction(const tN2kMsg &N2kMsg) {
 void tNMEA2000::StartAddressClaim(int iDev) {
   if ( IsReadyToSend() ) { // Start address claim automatically
     Devices[iDev].AddressClaimTimer.Disable();
-    if ( (ForwardStream!=0) && ( ForwardType==tNMEA2000::fwdt_Text) ) {
-      ForwardStream->print(F("Start address claim for device "));
-      ForwardStream->println(iDev);
-    }
     SendIsoAddressClaim(0xff,iDev);
     Devices[iDev].AddressClaimTimer.FromNow(N2kAddressClaimTimeout);
   }
@@ -2502,7 +2344,6 @@ void tNMEA2000::HandleCommandedAddress(uint64_t CommandedName, unsigned char New
 
 //*****************************************************************************
 void tNMEA2000::HandleCommandedAddress(const tN2kMsg &N2kMsg) {
-  N2kMsgDbgStart(" Commanded address:"); N2kMsgDbgln(N2kMsg.Destination);
 
   if ( N2kMsg.PGN!=65240L || !N2kMsg.IsTPMessage() || N2kMsg.DataLen!=9 ) return;
 
@@ -2634,17 +2475,14 @@ void tNMEA2000::ParseMessages() {
 
     while (FramesRead<MaxReadFramesOnParse && CANGetFrame(canId,len,buf) ) {           // check if data coming
         FramesRead++;
-        N2kMsgRxDbgStart("Received frame, can ID:"); N2kMsgRxDbg(canId); N2kMsgRxDbg(" len:"); N2kMsgRxDbg(len); N2kMsgRxDbg(" data:"); DbgPrintBuf(len,buf,false); N2kMsgRxDbgln();
         MsgIndex=SetN2kCANBufMsg(canId,len,buf);
         if (MsgIndex<MaxN2kCANMsgs) {
           if ( !HandleReceivedSystemMessage(MsgIndex) ) {
-            N2kMsgRxDbgStart(" - Non system message, MsgIndex: "); N2kMsgRxDbgln(MsgIndex);
             ForwardMessage(N2kCANMsgBuf[MsgIndex]);
           }
 //          N2kCANMsgBuf[MsgIndex].N2kMsg.Print(Serial);
           RunMessageHandlers(N2kCANMsgBuf[MsgIndex].N2kMsg);
           N2kCANMsgBuf[MsgIndex].FreeMessage();
-          N2kMsgRxDbgStart(" - Free message, MsgIndex: "); N2kMsgRxDbg(MsgIndex); N2kMsgRxDbgln();
         }
     }
 

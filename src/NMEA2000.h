@@ -657,20 +657,7 @@ public:
   };
 
 public:
-  /************************************************************************//**
-   * \enum    tForwardType
-   * \brief   Type how to forward messages in listen mode
-   */
-  typedef enum { 
-            /** Forwards messages to output port in Actisense format. Note 
-             * that some Navigation sw uses this. */
-            fwdt_Actisense,
 
-            /** Forwards messages to output port in clear text. This is e.g. 
-             *  for debugging. */
-            fwdt_Text 
-          } tForwardType;
-  
   /************************************************************************//**
    * \enum    tN2kMode
    * \brief   System mode defines how the device will behave on the 
@@ -721,10 +708,10 @@ public:
             dm_None, 
             /** Directs sent data to serial in clear text format
             */
-            dm_ClearText, 
+           // dm_ClearText, 
             /** Directs sent data to serial as Actisense format.
             */
-            dm_Actisense,  
+           // dm_Actisense,  
           } tDebugMode;
 
   /************************************************************************//**
@@ -953,7 +940,6 @@ protected:
      */
     tN2kMode N2kMode;
     /** \brief  Actual message forward type (default = fwdt_Actisense)*/
-    tForwardType ForwardType; 
     /** \brief  Actual message forward operation mode 
      *  (default = all messages - also system and own)*/
     unsigned int ForwardMode; 
@@ -973,6 +959,7 @@ protected:
 
     /** \brief  Pointer to a buffer for all internal devices */
     tInternalDevice *Devices;
+    tInternalDevice Devices_buf[2];
     /** \brief  Number of devices */
     int DeviceCount;
 //    unsigned long N2kSource[Max_N2kDevices];
@@ -2588,7 +2575,6 @@ public:
      * \param fwdType Format type see \ref tNMEA2000::tForwardType, 
      *                default = fwdt_Actisense
      */
-    void SetForwardType(tForwardType fwdType) { ForwardType=fwdType; }
 
     /*********************************************************************//**
      * \brief Set the Forward Stream object

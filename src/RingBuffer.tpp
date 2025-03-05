@@ -27,35 +27,6 @@
 
 #include "RingBuffer.h"
 
-//#define RING_BUFFER_ERROR_DEBUG
-//#define RING_BUFFER_DEBUG
-//#define RING_BUFFER_INIT_DEBUG
-
-#if defined(RING_BUFFER_DEBUG) || defined(RING_BUFFER_ERROR_DEBUG) || defined(RING_BUFFER_INIT_DEBUG)
-  #include <Arduino.h>
-  #ifndef DebugStream
-  #define DebugStream Serial
-  #endif
-#endif
-
-#if defined(RING_BUFFER_ERROR_DEBUG)
-  # define RingBufferErrDbgf(fmt, args...)   DebugStream.printf (fmt , ## args)
-#else
-  # define RingBufferErrDbgf(fmt, args...)
-#endif
-
-#if defined(RING_BUFFER_DEBUG)
-  # define RingBufferDbgf(fmt, args...)   DebugStream.printf (fmt , ## args)
-#else
-  # define RingBufferDbgf(fmt, args...)
-#endif
-
-#if defined(RING_BUFFER_INIT_DEBUG)
-  # define RingBufferInitDbgf(fmt, args...)   DebugStream.printf (fmt , ## args)
-#else
-  # define RingBufferInitDbgf(fmt, args...)
-#endif
-
 
 // *****************************************************************************
 template<typename T>

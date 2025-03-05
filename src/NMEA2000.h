@@ -1,53 +1,7 @@
-/* 
- * NMEA2000.h
- *
- * The MIT License
- *
- * Copyright (c) 2015-2024 Timo Lappalainen, Kave Oy, www.kave.fi
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
-*/
+#pragma once
 
-/*************************************************************************//**
- * \file  NMEA2000.h
- * \brief This file contains the class tNMEA2000, which consists the main
- *        functionality of the library
- * 
- * With tNMEA2000 class you can easily communicate with NMEA2000 bus.
- * Library can be used for any kind of NMEA2000 bus device needs from
- * bus traffic listener to complex MFD system.
- * 
- * As default library simply reads all messages from bus and forwards
- * them to defined forward stream (e.g., Serial) in Actisense format.
- * Using N2km_ListenAndNode mode, one can make NMEA2000 compatible devices and
- * even NMEA2000 certified devices by implementing all \ref secRefNMEA2000Certification
- * requirements. Simple example is bus device, which provides some sensor
- * like temperature, battery or engine information to the bus to be shown or MFD.
- * 
- * For detailed description see \ref tNMEA2000.
- * 
- */
-
-#ifndef _NMEA2000_H_
-#define _NMEA2000_H_
 
 #include "NMEA2000_CompilerDefns.h"
-#include "N2kStream.h"
 #include "N2kMsg.h"
 #include "N2kCANMsg.h"
 #include "N2kTimer.h"
@@ -157,7 +111,7 @@ public:
    * \param MaxLen  Max length of the buffer
    * \param buf     Pointer to the buffer
    */
-  static void ClearCharBuf(size_t MaxLen, char *buf);
+  static void ClearCharBuf(uint32_t MaxLen, char *buf);
   /************************************************************************//**
    * \brief Setting up a Char Buffer
    * 
@@ -167,7 +121,7 @@ public:
    * \param MaxLen  Max length of the buffer
    * \param buf     Pointer to the buffer
    */
-  static void SetCharBuf(const char *str, size_t MaxLen, char *buf);  
+  static void SetCharBuf(const char *str, uint32_t MaxLen, char *buf);  
   /************************************************************************//**
    * \brief Setting up a clean Char Buffer
    * 
@@ -178,7 +132,7 @@ public:
    * \param MaxLen  Max length of the buffer
    * \param buf     Pointer to the buffer
    */
-  static void ClearSetCharBuf(const char *str, size_t MaxLen, char *buf);
+  static void ClearSetCharBuf(const char *str, uint32_t MaxLen, char *buf);
 
   /************************************************************************//**
    * \brief Delivers Max out of A an B
@@ -698,21 +652,6 @@ public:
             N2km_ListenAndSend 
             } tN2kMode;
 
-  /************************************************************************//**
-   * \enum    tDebugMode
-   * \brief   For debugging we have some cases for SendMsg
-   */
-  typedef enum {
-            /** Directs data to CAN bus
-            */
-            dm_None, 
-            /** Directs sent data to serial in clear text format
-            */
-           // dm_ClearText, 
-            /** Directs sent data to serial as Actisense format.
-            */
-           // dm_Actisense,  
-          } tDebugMode;
 
   /************************************************************************//**
    * \struct   tConfigurationInformation
@@ -762,12 +701,7 @@ protected:
     /** \brief This holds all the Device Informations for this specific device*/
     tDeviceInformation DeviceInformation;
     // Product information
-    /** \brief This holds all the Product Informations for this 
-     * specific device*/
-    const tProductInformation *ProductInformation;
-    /** \brief This holds all the local (???) Product Informations for this 
-     * specific device*/
-    tProductInformation *LocalProductInformation;
+    tProductInformation ProductInformation;
     /** \brief This holds the Manufacturer Code for this 
      * specific device*/
     char *ManufacturerSerialCode;
@@ -792,7 +726,7 @@ protected:
     /** \brief Fast packet PGNs sequence counters*/
     unsigned long *PGNSequenceCounters;
     /** \brief Fast packet PGNs sequence counters*/
-    size_t MaxPGNSequenceCounters;
+    uint32_t MaxPGNSequenceCounters;
     /** \brief Holds the highest source address for Address Claim process*/
     uint8_t AddressClaimEndSource;
     /** \brief internal device has pending information*/
@@ -824,7 +758,7 @@ protected:
     tInternalDevice() {
       N2kSource=0;
       HasPendingInformation=false;
-      ProductInformation=0; LocalProductInformation=0; ManufacturerSerialCode=0;
+      ManufacturerSerialCode=0;
       AddressClaimEndSource=N2kMaxCanBusAddress; //GetNextAddressFromBeginning=true;
       TransmitMessages=0; ReceiveMessages=0;
       PGNSequenceCounters=0; MaxPGNSequenceCounters=0;
@@ -933,18 +867,11 @@ protected:
   static const int HandleModeBit_OnlyKnownMessages = BIT(4); 
 
 protected:
-    /** \brief  Attribute that holds the actual Debug Mode (default = md_none)*/
-    tDebugMode dbMode;
     /** \brief  Actual operation mode of this device (default = 
      * N2km_ListenOnly)
      */
     tN2kMode N2kMode;
-    /** \brief  Actual message forward type (default = fwdt_Actisense)*/
-    /** \brief  Actual message forward operation mode 
-     *  (default = all messages - also system and own)*/
-    unsigned int ForwardMode; 
-    /** \brief  Actual stream to be used for forward messaging*/
-    N2kStream *ForwardStream;
+
     /** \brief  Pointer to a buffer for Message Handlers*/
     tMsgHandler *MsgHandlers;
 
@@ -1019,7 +946,7 @@ protected:
      * 
      * \ref InitCANFrameBuffers(). 
     */
-    tCANSendFrame CANSendFrameBuf[32];
+    tCANSendFrame CANSendFrameBuf[16];
     /** \brief Size of CANSendFrameBuf or before initialization requested
      *         total frame buffering size.
      * 
@@ -1047,18 +974,6 @@ protected:
     */
     uint16_t MaxCANReceiveFrames;
 
-    /** \brief Callback function, which will be called when library start bus communication.
-    * 
-    * OnOpen Will be called when library starts bus communication. At open library first starts
-    * address claiming and after it has been accepted, other communication can start.
-    * OnOpen can be used e.g., for message timing synchronization so that every time device starts
-    * messages will have same sent offset. See also SetOnOpen().
-    *
-    * \note In future OnOpen may be called several times, if communication will be reopened
-    * by \ref Restart or driver error. Developer must take care that possible memory
-    * initializations will be handled properly in case OnOpen is called several times.
-    */
-    void (*OnOpen)();
         
     /** \brief Handler callbacks for normal messages */
     void (*MsgHandler)(const tN2kMsg &N2kMsg);  
@@ -1332,27 +1247,7 @@ protected:
      */
     bool HandleReceivedSystemMessage(int MsgIndex);
 
-    /*********************************************************************//**
-     * \brief Forwards a N2k message
-     * 
-     * This function forwards a n2k message according to the forward type 
-     * \ref ForwardType( \ref  tForwardType) to the correct 
-     * \ref ForwardStream.
-     *
-     * \param N2kMsg  N2k message object
-     */
-    void ForwardMessage(const tN2kMsg &N2kMsg);
-    
-    /*********************************************************************//**
-     * \brief Forwards a N2k message
-     * 
-     * This function forwards a n2k message according to the forward type 
-     * \ref ForwardType( \ref  tForwardType) to the correct 
-     * \ref ForwardStream.
-     *
-     * \param N2kCanMsg  N2k CAN message object, see \ref tN2kCANMsg
-     */
-    void ForwardMessage(const tN2kCANMsg &N2kCanMsg);
+
     
     /*********************************************************************//**
      * \brief Respond to an ISO request
@@ -1489,54 +1384,10 @@ protected:
      * \brief Get the Fast Packet Tx PGN Count 
      *
      * \param iDev    index of the device on \ref Devices
-     * \return size_t 
+     * \return uint32_t 
      */
-    size_t GetFastPacketTxPGNCount(int iDev);
+    uint32_t GetFastPacketTxPGNCount(int iDev);
 
-    /*********************************************************************//**
-     * \brief Is message forwarding enabled
-     * \sa
-     *  - \ref ForwardMode
-     *  - \ref N2kMode
-     * 
-     * Checks if forwarding i enabled and the node is not \ref N2km_SendOnly
-     * 
-     * \retval true 
-     * \retval false 
-     */
-    bool ForwardEnabled() const { return ((ForwardMode&FwdModeBit_EnableForward)>0 && (N2kMode!=N2km_SendOnly)); }
-    
-    /*********************************************************************//**
-     * \brief Is forwarding enabled for system messages
-     * \sa  \ref ForwardMode
-     * \retval true 
-     * \retval false 
-     */
-    bool ForwardSystemMessages() const { return ((ForwardMode&FwdModeBit_SystemMessages)>0); }
-    
-    /*********************************************************************//**
-     * \brief Is forwarding enabled for known messages only
-     * \sa  \ref ForwardMode
-     * \retval true 
-     * \retval false 
-     */
-    bool ForwardOnlyKnownMessages() const { return ((ForwardMode&FwdModeBit_OnlyKnownMessages)>0); }
-
-    /*********************************************************************//**
-     * \brief Is forwarding enabled for own messages
-     * \sa  \ref ForwardMode
-     * \retval true 
-     * \retval false 
-     */
-    bool ForwardOwnMessages() const { return ((ForwardMode&FwdModeBit_OwnMessages)>0); }
-
-    /*********************************************************************//**
-     * \brief Is handle only known messages enabled
-     *
-     * \retval true 
-     * \retval false 
-     */
-    bool HandleOnlyKnownMessages() const { return ((ForwardMode&HandleModeBit_OnlyKnownMessages)>0); }
 
     /*********************************************************************//**
      * \brief Run all message handlers
@@ -1586,7 +1437,7 @@ protected:
      * \retval false 
      */
     bool IsReadyToSend() const {
-      return ( (OpenState==os_Open || dbMode!=dm_None) &&
+      return ( (OpenState==os_Open) &&
                (N2kMode!=N2km_ListenOnly) &&
                (N2kMode!=N2km_SendOnly) &&
                (N2kMode!=N2km_ListenAndSend)
@@ -2015,7 +1866,7 @@ public:
      * \param max_len   Maximum size of the buffer
      * \param iDev      index of the device on \ref Devices
      */
-    void GetModelID(char *buf, size_t max_len, int iDev=0) const;
+    void GetModelID(char *buf, uint32_t max_len, int iDev=0) const;
 
     /**********************************************************************//**
      * \brief Get the Sw Code of the device
@@ -2024,7 +1875,7 @@ public:
      * \param max_len   Maximum size of the buffer
      * \param iDev      index of the device on \ref Devices
      */
-    void GetSwCode(char *buf, size_t max_len, int iDev=0) const;
+    void GetSwCode(char *buf, uint32_t max_len, int iDev=0) const;
 
     /**********************************************************************//**
      * \brief Get the Model Version of the device
@@ -2033,7 +1884,7 @@ public:
      * \param max_len   Maximum size of the buffer
      * \param iDev      index of the device on \ref Devices
      */
-    void GetModelVersion(char *buf, size_t max_len, int iDev=0) const;
+    void GetModelVersion(char *buf, uint32_t max_len, int iDev=0) const;
 
     /**********************************************************************//**
      * \brief Get the Model Serial of the device
@@ -2042,7 +1893,7 @@ public:
      * \param max_len   Maximum size of the buffer
      * \param iDev      index of the device on \ref Devices
      */
-    void GetModelSerialCode(char *buf, size_t max_len, int iDev=0) const;
+    void GetModelSerialCode(char *buf, uint32_t max_len, int iDev=0) const;
 
     /**********************************************************************//**
      * \brief Get the Certification Level of the device
@@ -2092,7 +1943,7 @@ public:
      * \param max_len   Max size of the buffer
      * 
      */
-    void GetInstallationDescription1(char *buf, size_t max_len);
+    void GetInstallationDescription1(char *buf, uint32_t max_len);
     
     /*********************************************************************//**
      * \brief Get the Install Description 2 of this device
@@ -2101,7 +1952,7 @@ public:
      * \param max_len   Max size of the buffer
      * 
      */
-    void GetInstallationDescription2(char *buf, size_t max_len);
+    void GetInstallationDescription2(char *buf, uint32_t max_len);
     
     /*********************************************************************//**
      * \brief Get the Manufacturer Information of this device
@@ -2110,7 +1961,7 @@ public:
      * \param max_len   Max size of the buffer
      * 
      */
-    void GetManufacturerInformation(char *buf, size_t max_len);
+    void GetManufacturerInformation(char *buf, uint32_t max_len);
     
     /*********************************************************************//**
      * \brief Check if this device has changed its Install Description
@@ -2576,24 +2427,6 @@ public:
      *                default = fwdt_Actisense
      */
 
-    /*********************************************************************//**
-     * \brief Set the Forward Stream object
-     *
-     * As default, forward stream has been set to null. For e.g. Arduino 
-     * Due you can set it to SerialUSB, so you can use Serial for other 
-     * things. You can of coarse use any stream available on your device.  
-     * See example ActisenseListenerSender.ino.
-     * 
-     * \param _stream Stream to be used for message forwarding
-     */
-    void SetForwardStream(N2kStream* _stream) { ForwardStream=_stream; }
-
-    /*********************************************************************//**
-     * \brief Read current Forward Stream object
-     * 
-     * \return current Forward Stream object or 0 if not set. 
-     */
-    N2kStream* GetForwardStream() const { return ForwardStream; }
 
     /*********************************************************************//**
      * \brief Open the CAN device
@@ -2699,18 +2532,6 @@ public:
      */
     void ParseMessages();
     
-    /*********************************************************************//**
-     * \brief Set OnOpen callback function
-     *
-     * OnOpen will be called, when communication really opens
-     * and starts initial address claiming. You can use this to init your message sending
-     * to synchronize them with e.g., heartbeat.
-     *
-     * \note In future OnOpen may be called several times, if communication will be reopened
-     * by \ref Restart or driver error. Developer must take care that possible memory
-     * initializations will be handled properly in case OnOpen is called several times.
-     */
-    void SetOnOpen(void (*_OnOpen)());
 
     /*********************************************************************//**
      * \brief Set the message handler for incoming NMEA2000 messages.
@@ -2873,98 +2694,8 @@ public:
      */
     bool ReadResetDeviceInformationChanged();
 
-    /*********************************************************************//**
-     * \brief Enable message forwarding to stream
-     * 
-     * Set true as default. With this you can control if bus messages 
-     * will be forwarded to forward stream.  
-     * 
-     * \sa \ref secMessageforwarding.
-     * 
-     * \param v   Enable, default = true
-     */
-    void EnableForward(bool v=true) {
-        if (v) { ForwardMode |= FwdModeBit_EnableForward;  } else { ForwardMode &= ~FwdModeBit_EnableForward; }
-    }
 
-    /*********************************************************************//**
-     * \brief Enable System Messages for forwarding 
-     *
-     * Set true as default. With this you can control if system messages 
-     * like address claiming, device information will be forwarded to 
-     * forward stream.  If you set this false, system messages will not 
-     * be forwarded to the stream.
-     * 
-     * \param v   Enable, default = true
-     */
-    void SetForwardSystemMessages(bool v=true) {
-        if (v) { ForwardMode |= FwdModeBit_SystemMessages;  } else { ForwardMode &= ~FwdModeBit_SystemMessages; }
-      }
 
-    /*********************************************************************//**
-     * \brief Enable Only Known Messages for forwarding 
-     *
-     * Set false as default. With this you can control if unknown messages 
-     * will be forwarded to forward stream. If you set this true, all 
-     * unknown message will not be forwarded to the stream.
-     * 
-     * \note This does not effect for own messages. Known messages are 
-     * listed on library.  
-     * 
-     * \sa 
-     * - \ref tNMEA2000::SetSingleFrameMessages
-     * - \ref tNMEA2000::SetFastPacketMessages
-     * - \ref tNMEA2000::ExtendSingleFrameMessages
-     * - \ref tNMEA2000::ExtendFastPacketMessages
-     * 
-     * \param v   Enable, default = false
-     */      
-    void SetForwardOnlyKnownMessages(bool v=true) {
-        if (v) { ForwardMode |= FwdModeBit_OnlyKnownMessages;  } else { ForwardMode &= ~FwdModeBit_OnlyKnownMessages; }
-      }
-
-    /*********************************************************************//**
-     * \brief Enable Own Messages for forwarding 
-     *
-     * Set true as default. With this you can control if messages your 
-     * device sends to bus will be forwarded to forward stream.
-     * 
-     * \param v   Enable, default = true
-     */
-    void SetForwardOwnMessages(bool v=true) {
-        if (v) { ForwardMode |= FwdModeBit_OwnMessages;  } else { ForwardMode &= ~FwdModeBit_OwnMessages; }
-      }
-    
-    /*********************************************************************//**
-     * \brief Set the Handle Only Known Messages
-     *
-     * Set false as default. With this you can control if unknown messages 
-     * will be handled at all. Known messages are listed on library.
-     * 
-     * \sa
-     * - \ref tNMEA2000::SetSingleFrameMessages
-     * - \ref tNMEA2000::SetFastPacketMessages
-     * - \ref tNMEA2000::ExtendSingleFrameMessages
-     * - \ref tNMEA2000::ExtendFastPacketMessages
-     * 
-     * \param v   Enable, default = false
-     */
-    void SetHandleOnlyKnownMessages(bool v=true) {
-        if (v) { ForwardMode |= HandleModeBit_OnlyKnownMessages;  } else { ForwardMode &= ~HandleModeBit_OnlyKnownMessages; }
-      }
-
-    /*********************************************************************//**
-     * \brief Set the Debug Mode of the system
-     *
-     * If you do not have physical N2k bus connection and you like to test 
-     * your board without even CAN controller, you can use this function.  
-     * 
-     * \sa 
-     * - \ref descDebugMode
-     * 
-     * \param _dbMode Debug mode, see \ref tNMEA2000::tDebugMode
-     */
-    void SetDebugMode(tDebugMode _dbMode);
 
     /*********************************************************************//**
      * \brief Checks if the given Address is a broadcast address
@@ -3185,9 +2916,9 @@ inline void SetN2kConfigurationInformation(tN2kMsg &N2kMsg,
  * 
  */
 bool ParseN2kPGN126998(const tN2kMsg& N2kMsg,
-                       size_t &ManufacturerInformationSize, char *ManufacturerInformation,
-                       size_t &InstallationDescription1Size, char *InstallationDescription1,
-                       size_t &InstallationDescription2Size, char *InstallationDescription2);
+                       uint32_t &ManufacturerInformationSize, char *ManufacturerInformation,
+                       uint32_t &InstallationDescription1Size, char *InstallationDescription1,
+                       uint32_t &InstallationDescription2Size, char *InstallationDescription2);
 
 /************************************************************************//**
  * \brief Setting up PGN 59904 Message "ISO request"
@@ -3299,5 +3030,3 @@ void SetN2kPGN126993(tN2kMsg &N2kMsg, uint32_t timeInterval_ms, uint8_t sequence
 inline void SetHeartbeat(tN2kMsg &N2kMsg, uint32_t timeInterval_ms, uint8_t sequenceCounter) {
 	SetN2kPGN126993(N2kMsg, timeInterval_ms, sequenceCounter);
 }
-
-#endif

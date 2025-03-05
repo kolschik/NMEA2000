@@ -276,7 +276,7 @@ class tN2kDeviceList : public tNMEA2000::tMsgHandler {
          * 
          * \return char* ->  empty Configuration Information
          */
-        char * InitConfigurationInformation(size_t &_ManISize, size_t &_InstDesc1Size, size_t &_InstDesc2Size);
+        char * InitConfigurationInformation(uint32_t &_ManISize, uint32_t &_InstDesc1Size, uint32_t &_InstDesc2Size);
         
         /******************************************************************//**
          * \brief Get the Manufacturer Information of this device

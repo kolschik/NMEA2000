@@ -18,7 +18,7 @@ const char* password = "Guest";
 const uint16_t ServerPort=2222; // Define the port, where served sends data. Use this e.g. on OpenCPN
 const char *ServerIP="192.168.40.33"; // Define the IP, what server will use. This has to be within your local network. Leave empty for DHCP
 
-const size_t MaxClients=10;
+const uint32_t MaxClients=10;
 bool SendNMEA0183Conversion=true; // Do we send NMEA2000 -> NMEA0183 consverion
 bool SendSeaSmart=true; // Do we send NMEA2000 messages in SeaSmart format
 bool ResetWiFiSettings=true; // If you have tested other code in your module, it may have saved settings and have difficulties to make connection.

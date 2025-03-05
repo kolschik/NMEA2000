@@ -249,7 +249,7 @@ void tN2kMsg::AddVarStr(const char *str, bool UsePgm) {
 }
 
 //*****************************************************************************
-void tN2kMsg::AddBuf(const void *buf, size_t bufLen) {
+void tN2kMsg::AddBuf(const void *buf, uint32_t bufLen) {
   if ( DataLen<MaxDataLen ) {
     if ( DataLen+bufLen>MaxDataLen ) bufLen=MaxDataLen-DataLen;
   } else bufLen=0;
@@ -373,12 +373,12 @@ float  tN2kMsg::GetFloat(int &Index, float def) const {
 }
 
 //*****************************************************************************
-bool tN2kMsg::GetStr(char *StrBuf, size_t Length, int &Index) const {
+bool tN2kMsg::GetStr(char *StrBuf, uint32_t Length, int &Index) const {
   unsigned char vb;
   bool nullReached = false;
   StrBuf[0] = '\0';
-  if ((size_t)Index+Length<=(size_t)DataLen) {
-    for (size_t i=0; i<Length; i++) {
+  if ((uint32_t)Index+Length<=(uint32_t)DataLen) {
+    for (uint32_t i=0; i<Length; i++) {
       vb = GetByte(Index);
       if (! nullReached) {
         if (vb == 0x00 || vb == '@') {
@@ -399,7 +399,7 @@ bool tN2kMsg::GetStr(char *StrBuf, size_t Length, int &Index) const {
 }
 
 //*****************************************************************************
-bool tN2kMsg::GetStr(size_t StrBufSize, char *StrBuf, size_t Length, unsigned char nulChar, int &Index) const {
+bool tN2kMsg::GetStr(uint32_t StrBufSize, char *StrBuf, uint32_t Length, unsigned char nulChar, int &Index) const {
   unsigned char vb;
   bool nullReached = false;
   if ( StrBufSize==0 || StrBuf==0 ) {
@@ -407,8 +407,8 @@ bool tN2kMsg::GetStr(size_t StrBufSize, char *StrBuf, size_t Length, unsigned ch
     return true;
   }
   StrBuf[0] = '\0';
-  if ((size_t)Index+Length<=(size_t)DataLen) {
-    size_t i;
+  if ((uint32_t)Index+Length<=(uint32_t)DataLen) {
+    uint32_t i;
     for (i=0; i<Length && i<StrBufSize-1; i++) {
       vb = GetByte(Index);
       if (! nullReached) {
@@ -430,8 +430,8 @@ bool tN2kMsg::GetStr(size_t StrBufSize, char *StrBuf, size_t Length, unsigned ch
 }
 
 //*****************************************************************************
-bool tN2kMsg::GetVarStr(size_t &StrBufSize, char *StrBuf, int &Index) const {
-  size_t Len=GetByte(Index);
+bool tN2kMsg::GetVarStr(uint32_t &StrBufSize, char *StrBuf, int &Index) const {
+  uint32_t Len=GetByte(Index);
   uint8_t Type=GetByte(Index);
   if ( Len<2) { StrBufSize=0; return false; } // invalid length
   Len-=2;
@@ -446,10 +446,10 @@ bool tN2kMsg::GetVarStr(size_t &StrBufSize, char *StrBuf, int &Index) const {
 }
 
 //*****************************************************************************
-bool tN2kMsg::GetBuf(void *buf, size_t Length, int &Index) const {
+bool tN2kMsg::GetBuf(void *buf, uint32_t Length, int &Index) const {
   bool ret=true;
 
-  if ((size_t)Index+Length<=(size_t)DataLen) {
+  if ((uint32_t)Index+Length<=(uint32_t)DataLen) {
     if ( buf!=0 ) {
       memcpy(buf,Data+Index,Length);
     } else {
@@ -538,7 +538,7 @@ int64_t byteswap(int64_t val) {
 
 //*****************************************************************************
 template<typename T>
-T GetBuf(size_t len, int& index, const unsigned char* buf) {
+T GetBuf(uint32_t len, int& index, const unsigned char* buf) {
   T v{0};
 
   // This could be improved by casting the buffer to a pointer of T and
@@ -555,7 +555,7 @@ T GetBuf(size_t len, int& index, const unsigned char* buf) {
 
 //*****************************************************************************
 template<typename T>
-void SetBuf(T v, size_t len, int& index, unsigned char* buf) {
+void SetBuf(T v, uint32_t len, int& index, unsigned char* buf) {
 #if defined(HOST_IS_BIG_ENDIAN)
   v = byteswap(v);
 #endif
@@ -848,18 +848,6 @@ void SetBufStr(const char *str, int len, int &index, unsigned char *buf, bool Us
   }
 }
 
-//*****************************************************************************
-void PrintBuf(N2kStream *port, unsigned char len, const unsigned char *pData, bool AddLF) {
-  if (port==0) return;
-
-  for(int i = 0; i<len; i++) {
-    if (i>0) { port->print(F(",")); };
-    // Print bytes as hex.
-    port->print(pData[i], 16);
-  }
-
-  if (AddLF) port->println(F(""));
-}
 
 
 //*****************************************************************************

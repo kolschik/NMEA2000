@@ -41,7 +41,6 @@
 #ifndef _tN2kMsg_H_
 #define _tN2kMsg_H_
 
-#include "N2kStream.h"
 #include "N2kDef.h"
 #include <stdint.h>
 
@@ -1042,7 +1041,7 @@ public:
   * \param buf     Pointer to the byte array 
   * \param bufLen  Number of bytes to add
   */
-  void AddBuf(const void *buf, size_t bufLen);
+  void AddBuf(const void *buf, uint32_t bufLen);
 
  /************************************************************************//**
   * \brief Get the value from a byte out of \ref Data
@@ -1249,7 +1248,7 @@ public:
   * \return true   String data has been extracted
   * \return false  not successful, no string data available
   */
-  bool GetStr(char *StrBuf, size_t Length, int &Index) const;
+  bool GetStr(char *StrBuf, uint32_t Length, int &Index) const;
 
   /************************************************************************//**
    * \brief Get a string out of \ref Data
@@ -1265,7 +1264,7 @@ public:
    * \return true   String data has been extracted
    * \return false  not successful, no string data available
    */
-  bool GetStr(size_t StrBufSize, char *StrBuf, size_t Length, unsigned char nulChar, int &Index) const;
+  bool GetStr(uint32_t StrBufSize, char *StrBuf, uint32_t Length, unsigned char nulChar, int &Index) const;
 
   /************************************************************************//**
    * \brief Get a string out of \ref Data
@@ -1281,7 +1280,7 @@ public:
    * \return true   String data has been extracted
    * \return false  not successful, no string data available
    */
-  bool GetVarStr(size_t &StrBufSize, char *StrBuf, int &Index) const;
+  bool GetVarStr(uint32_t &StrBufSize, char *StrBuf, int &Index) const;
 
   /************************************************************************//**
    * \brief Get a byte array out of \ref Data
@@ -1294,7 +1293,7 @@ public:
    * \return true   data has been extracted
    * \return false  not successful, no data available
    */
-  bool GetBuf(void *buf, size_t Length, int &Index) const;
+  bool GetBuf(void *buf, uint32_t Length, int &Index) const;
 
   /************************************************************************//**
    * \brief Set a byte in \ref Data
@@ -1320,31 +1319,8 @@ public:
    */
   bool Set2ByteUInt(uint16_t v, int &Index);
 
-  /************************************************************************//**
-   * \brief Print out the whole content of the N2kMsg Object
-   * 
-   * \param port      port where to stream, see \ref N2kStream
-   * \param NoData    if true the data buffer will not be printed
-   */
-  void Print(N2kStream *port, bool NoData=false) const;
 
-  /************************************************************************//**
-   * \brief Print out the whole content of the N2kMsg Object
-   * using the Actisense Format
-   * 
-   * \param port      port where to stream, see \ref N2kStream
-   */
-  void SendInActisenseFormat(N2kStream *port) const;
 };
 
-/************************************************************************//**
- * \brief Print out a buffer (byte array)
- * 
- * \param port    port where to stream, see \ref N2kStream
- * \param len     Number of bytes to be printed 
- * \param pData   Pointer to the buffer
- * \param AddLF   true will add a LineFeed at the end
- */
-void PrintBuf(N2kStream *port, unsigned char len, const unsigned char *pData, bool AddLF=false);
 
 #endif

@@ -54,26 +54,7 @@
  */
 const char *N2kEnumTypeEmpty="";
 
-/************************************************************************//**
- * \brief Print function for the enum values
- * 
- * This function template generation an text output to the defined stream. 
- * Corresponding to the type of the enum value, the correct function (and
- * therefore output text) is chosen.
- * 
- * @tparam T            Type of the enum
- * @param a             enum value
- * @param OutputStream  stream handler for the output
- * @param addLF         add a line feed (default = true)
- */
-template<typename T> void PrintN2kEnumType(T a, Stream *OutputStream, bool addLF=true) {
-  const char *str=N2kEnumTypeToStr(a);
-  if (str[0] != '\0') {
-    if (addLF) { OutputStream->println(str); } else { OutputStream->print(str); }
-  } else {
-    OutputStream->print(F("unknown (")); OutputStream->print(a); OutputStream->println(F(")"));
-  }
-}
+
 /************************************************************************//**
  * \brief Macro function for converting various N2k Enums to a const char
  * 

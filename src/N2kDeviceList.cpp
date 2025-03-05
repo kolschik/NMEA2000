@@ -25,16 +25,6 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <stdlib.h>
 #include "N2kDeviceList.h"
 
-//#define N2kDeviceList_HANDLE_IN_DEBUG
-
-#if defined(N2kDeviceList_HANDLE_IN_DEBUG)
-#define DebugStream Serial
-# define N2kHandleInDbg(fmt, args...)     DebugStream.print (fmt , ## args)
-# define N2kHandleInDbgln(fmt, args...)   DebugStream.println (fmt , ## args)
-#else
-# define N2kHandleInDbg(fmt, args...)
-# define N2kHandleInDbgln(fmt, args...)
-#endif
 
 //*****************************************************************************
 tN2kDeviceList::tN2kDeviceList(tNMEA2000 *_pNMEA2000) : tNMEA2000::tMsgHandler(0,_pNMEA2000) {
@@ -183,7 +173,6 @@ void tN2kDeviceList::HandleOther(const tN2kMsg &N2kMsg) {
       // Test do we need product information for this device
       if ( Sources[i]->ReadyForRequestProductInformation() ) {
         if ( RequestProductInformation(Sources[i]->GetSource()) ) {
-          N2kHandleInDbg(N2kMillis()); N2kHandleInDbg(" Request product information for source: "); N2kHandleInDbgln(Sources[i]->GetSource());
           Sources[i]->SetProductInformationRequested();
           HasPendingRequests=true;
           return;
@@ -201,7 +190,6 @@ void tN2kDeviceList::HandleOther(const tN2kMsg &N2kMsg) {
       // Test do we need product information for this device
       if ( Sources[i]->ReadyForRequestConfigurationInformation() ) {
         if ( RequestConfigurationInformation(Sources[i]->GetSource()) ) {
-          N2kHandleInDbg(N2kMillis()); N2kHandleInDbg(" Request configuration information for source: "); N2kHandleInDbgln(Sources[i]->GetSource());
           Sources[i]->SetConfigurationInformationRequested();
           HasPendingRequests=true;
           return;
@@ -219,7 +207,7 @@ void tN2kDeviceList::HandleOther(const tN2kMsg &N2kMsg) {
       // Test do we need product information for this device
       if ( Sources[i]->ReadyForRequestPGNList() ) {
         if ( RequestSupportedPGNList(Sources[i]->GetSource()) ) {
-          N2kHandleInDbg(N2kMillis()); N2kHandleInDbg(" Request supported PGN lists for source: "); N2kHandleInDbgln(Sources[i]->GetSource());
+    
           Sources[i]->SetPGNListRequested();
           HasPendingRequests=true;
           return;
@@ -259,7 +247,7 @@ void tN2kDeviceList::HandleIsoAddressClaim(const tN2kMsg &N2kMsg) {
   // First check do we already have recorded caller
   if ( N2kMsg.Source<N2kMaxBusDevices && Sources[N2kMsg.Source]!=0 ) {
     pDevice=Sources[N2kMsg.Source];
-    N2kHandleInDbg("ISO address claim. Caller:"); N2kHandleInDbg((uint32_t)CallerName); N2kHandleInDbg(", uniq:" ); N2kHandleInDbgln(pDevice->GetUniqueNumber());
+    
     if ( pDevice->GetName()==0 ) {  // Device reservation made by HandleMsg, Name has not set yet
       tInternalDevice *pDevice2=LocalFindDeviceByName(CallerName); // Find does this actually exist with other source
       if ( pDevice2!=0 ) { // We have already seen that message on other address, so move it here
@@ -270,7 +258,6 @@ void tN2kDeviceList::HandleIsoAddressClaim(const tN2kMsg &N2kMsg) {
       } else {
         pDevice->SetDeviceInformation(CallerName);
         ListUpdated=true;
-        N2kHandleInDbg("Saving name for source:"); N2kHandleInDbgln(N2kMsg.Source);
       }
     } else if (!pDevice->IsSame(CallerName) ) { // exists, but name does not match. So device on this source position has claimed address and this has taken its place
       // Just move old device to some empty place
@@ -296,7 +283,6 @@ void tN2kDeviceList::HandleIsoAddressClaim(const tN2kMsg &N2kMsg) {
     if ( pDevice!=0 ) { // Address changed, simply move device to new place.
       Sources[pDevice->GetSource()]=0;
       SaveDevice(pDevice,N2kMsg.Source);
-      N2kHandleInDbg("Source updated: "); N2kHandleInDbgln(pDevice->GetSource());
     } else { // New device
       pDevice=new tInternalDevice(CallerName);
       SaveDevice(pDevice,N2kMsg.Source);
@@ -319,7 +305,6 @@ void tN2kDeviceList::HandleProductInformation(const tN2kMsg &N2kMsg) {
 
   tInternalDevice *pDevice=Sources[N2kMsg.Source];
 
-  N2kHandleInDbg(" Handle product information for source: "); N2kHandleInDbgln(N2kMsg.Source);
 
   if ( !pDevice->HasProductInformation() &&
        ParseN2kPGN126996(N2kMsg,ProdI.N2kVersion,ProdI.ProductCode,
@@ -344,13 +329,12 @@ void tN2kDeviceList::HandleConfigurationInformation(const tN2kMsg &N2kMsg) {
   if ( N2kMsg.Source>=N2kMaxBusDevices || Sources[N2kMsg.Source]==0 ) return;
 
 //  unsigned long t1=micros();
-  size_t ManISize;
-  size_t InstDesc1Size;
-  size_t InstDesc2Size;
+  uint32_t ManISize;
+  uint32_t InstDesc1Size;
+  uint32_t InstDesc2Size;
 
   tInternalDevice *pDevice=Sources[N2kMsg.Source];
 
-  N2kHandleInDbg(" Handle configuration information for source: "); N2kHandleInDbgln(N2kMsg.Source);
 
   if ( ParseN2kPGN126998(N2kMsg,ManISize,0,InstDesc1Size,0,InstDesc2Size,0) ) { // First query required size
     pDevice->InitConfigurationInformation(ManISize,InstDesc1Size,InstDesc2Size);
@@ -401,7 +385,7 @@ void tN2kDeviceList::HandleSupportedPGNList(const tN2kMsg &N2kMsg) {
 uint8_t tN2kDeviceList::Count() const {
   uint8_t ret=0;
 
-  for ( size_t i=0; i<MaxDevices; i++ ) if ( Sources[i]!=0 ) ret++;
+  for ( uint32_t i=0; i<MaxDevices; i++ ) if ( Sources[i]!=0 ) ret++;
 
   return ret;
 }
@@ -427,7 +411,7 @@ tN2kDeviceList::tInternalDevice::~tInternalDevice() {
 }
 
 //*****************************************************************************
-char * tN2kDeviceList::tInternalDevice::InitConfigurationInformation(size_t &_ManISize, size_t &_InstDesc1Size, size_t &_InstDesc2Size) {
+char * tN2kDeviceList::tInternalDevice::InitConfigurationInformation(uint32_t &_ManISize, uint32_t &_InstDesc1Size, uint32_t &_InstDesc2Size) {
   if ( _ManISize>0 ) _ManISize++; // Reserve '/0' terminator
   if ( _InstDesc1Size>0 ) _InstDesc1Size++; // Reserve '/0' terminator
   if ( _InstDesc2Size>0 ) _InstDesc2Size++; // Reserve '/0' terminator

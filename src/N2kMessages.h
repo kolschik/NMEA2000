@@ -305,7 +305,7 @@ inline void SetN2kAISSafetyRelatedBroadcastMsg(tN2kMsg &N2kMsg, uint8_t MessageI
  * \sa tN2kAISTransceiverInformation
  */
 bool ParseN2kPGN129802(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &SourceID,
-      tN2kAISTransceiverInformation &AISTransceiverInformation, char * SafetyRelatedText, size_t &SafetyRelatedTextMaxSize);
+      tN2kAISTransceiverInformation &AISTransceiverInformation, char * SafetyRelatedText, uint32_t &SafetyRelatedTextMaxSize);
 
 /************************************************************************//**
  * \brief Parsing the content of a "AIS Safety Related Broadcast Message" 
@@ -316,7 +316,7 @@ bool ParseN2kPGN129802(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat 
  * of the source code. See parameter details on \ref ParseN2kPGN129802 
  */
 inline bool ParseN2kAISSafetyRelatedBroadcastMsg(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &SourceID,
-      tN2kAISTransceiverInformation &AISTransceiverInformation, char * SafetyRelatedText, size_t &SafetyRelatedTextMaxSize) {
+      tN2kAISTransceiverInformation &AISTransceiverInformation, char * SafetyRelatedText, uint32_t &SafetyRelatedTextMaxSize) {
    return ParseN2kPGN129802(N2kMsg, MessageID, Repeat, SourceID, AISTransceiverInformation, SafetyRelatedText, SafetyRelatedTextMaxSize);
 }
 
@@ -4595,9 +4595,9 @@ inline void SetN2kAISClassAStatic(tN2kMsg &N2kMsg, uint8_t MessageID, tN2kAISRep
  * 
  */
 bool ParseN2kPGN129794(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID,
-		       uint32_t &IMOnumber, char *Callsign, size_t CallsignBufSize, char *Name, size_t NameBufSize, uint8_t &VesselType, double &Length,
+		       uint32_t &IMOnumber, char *Callsign, uint32_t CallsignBufSize, char *Name, uint32_t NameBufSize, uint8_t &VesselType, double &Length,
 		       double &Beam, double &PosRefStbd, double &PosRefBow, uint16_t &ETAdate, double &ETAtime,
-		       double &Draught, char *Destination, size_t DestinationBufSize, tN2kAISVersion &AISversion, tN2kGNSStype &GNSStype,
+		       double &Draught, char *Destination, uint32_t DestinationBufSize, tN2kAISVersion &AISversion, tN2kGNSStype &GNSStype,
 		       tN2kAISDTE &DTE, tN2kAISTransceiverInformation &AISinfo, uint8_t &SID);
 
 /************************************************************************//**
@@ -4609,9 +4609,9 @@ bool ParseN2kPGN129794(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat 
  * of the source code. See parameter details on \ref ParseN2kPGN129794
  */
 inline bool ParseN2kAISClassAStatic(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID,
-				    uint32_t & IMOnumber, char *Callsign, size_t CallsignBufSize, char *Name, size_t NameBufSize, uint8_t &VesselType, double &Length,
+				    uint32_t & IMOnumber, char *Callsign, uint32_t CallsignBufSize, char *Name, uint32_t NameBufSize, uint8_t &VesselType, double &Length,
 				    double &Beam, double &PosRefStbd, double &PosRefBow, uint16_t &ETAdate, double &ETAtime,
-				    double &Draught, char *Destination, size_t DestinationBufSize, tN2kAISVersion &AISversion, tN2kGNSStype &GNSStype,
+				    double &Draught, char *Destination, uint32_t DestinationBufSize, tN2kAISVersion &AISversion, tN2kGNSStype &GNSStype,
 				    tN2kAISDTE &DTE, tN2kAISTransceiverInformation &AISinfo, uint8_t &SID) {
   return ParseN2kPGN129794(N2kMsg, MessageID, Repeat, UserID, IMOnumber, Callsign, CallsignBufSize, Name, NameBufSize, VesselType, Length,
 			   Beam, PosRefStbd, PosRefBow, ETAdate, ETAtime, Draught, Destination, DestinationBufSize,AISversion,
@@ -4630,9 +4630,9 @@ inline bool ParseN2kAISClassAStatic(const tN2kMsg &N2kMsg, uint8_t &MessageID, t
  * of the source code. See parameter details on \ref ParseN2kPGN129794
  */
 inline bool ParseN2kAISClassAStatic(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID,
-				    uint32_t & IMOnumber, char *Callsign, size_t CallsignBufSize, char *Name, size_t NameBufSize, uint8_t &VesselType, double &Length,
+				    uint32_t & IMOnumber, char *Callsign, uint32_t CallsignBufSize, char *Name, uint32_t NameBufSize, uint8_t &VesselType, double &Length,
 				    double &Beam, double &PosRefStbd, double &PosRefBow, uint16_t &ETAdate, double &ETAtime,
-				    double &Draught, char *Destination, size_t DestinationBufSize, tN2kAISVersion &AISversion, tN2kGNSStype &GNSStype,
+				    double &Draught, char *Destination, uint32_t DestinationBufSize, tN2kAISVersion &AISversion, tN2kGNSStype &GNSStype,
 				    tN2kAISDTE &DTE) {
   tN2kAISTransceiverInformation AISinfo;
   uint8_t SID;
@@ -4717,7 +4717,7 @@ inline void SetN2kAISClassBStaticPartA(tN2kMsg &N2kMsg, uint8_t MessageID, tN2kA
  * \return true     Parsing of PGN Message successful
  * \return false    Parsing of PGN Message aborted
  */
-bool ParseN2kPGN129809(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID, char *Name, size_t NameBufSizem, tN2kAISTransceiverInformation &AISInfo, uint8_t &SID);
+bool ParseN2kPGN129809(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID, char *Name, uint32_t NameBufSizem, tN2kAISTransceiverInformation &AISInfo, uint8_t &SID);
 
 /************************************************************************//**
  * \brief Parsing the content of a "AIS static data class B part A"
@@ -4727,7 +4727,7 @@ bool ParseN2kPGN129809(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat 
  * Alias of PGN 129809. This alias was introduced to improve the readability
  * of the source code. See parameter details on \ref ParseN2kPGN129809 
  */
-inline bool ParseN2kAISClassBStaticPartA(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID, char *Name, size_t NameBufSize,
+inline bool ParseN2kAISClassBStaticPartA(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID, char *Name, uint32_t NameBufSize,
 					 tN2kAISTransceiverInformation &AISInfo, uint8_t &SID) {
   return ParseN2kPGN129809(N2kMsg, MessageID, Repeat, UserID, Name, NameBufSize, AISInfo, SID);
 }
@@ -4743,7 +4743,7 @@ inline bool ParseN2kAISClassBStaticPartA(const tN2kMsg &N2kMsg, uint8_t &Message
  * Alias of PGN 129809. This alias was introduced to improve the readability
  * of the source code. See parameter details on \ref ParseN2kPGN129809 
  */
-inline bool ParseN2kAISClassBStaticPartA(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID, char *Name, size_t NameBufSize) {
+inline bool ParseN2kAISClassBStaticPartA(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID, char *Name, uint32_t NameBufSize) {
   tN2kAISTransceiverInformation AISInfo;
   uint8_t SID;
   return ParseN2kPGN129809(N2kMsg, MessageID, Repeat, UserID, Name, NameBufSize, AISInfo, SID);
@@ -4852,7 +4852,7 @@ inline void SetN2kAISClassBStaticPartB(tN2kMsg &N2kMsg, uint8_t MessageID, tN2kA
  * 
  */
 bool ParseN2kPGN129810(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID,
-		       uint8_t &VesselType, char *Vendor, size_t VendorBufSize, char *Callsign, size_t CallsignBufSize,double &Length, double &Beam,
+		       uint8_t &VesselType, char *Vendor, uint32_t VendorBufSize, char *Callsign, uint32_t CallsignBufSize,double &Length, double &Beam,
 		       double &PosRefStbd, double &PosRefBow, uint32_t &MothershipID, tN2kAISTransceiverInformation &AISInfo, uint8_t &SID);
 
 /************************************************************************//**
@@ -4864,7 +4864,7 @@ bool ParseN2kPGN129810(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat 
  * of the source code. See parameter details on \ref ParseN2kPGN129810 
  */
 inline bool ParseN2kAISClassBStaticPartB(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID,
-					 uint8_t &VesselType, char *Vendor, size_t VendorBufSize, char *Callsign, size_t CallsignBufSize, double &Length, double &Beam,
+					 uint8_t &VesselType, char *Vendor, uint32_t VendorBufSize, char *Callsign, uint32_t CallsignBufSize, double &Length, double &Beam,
 					 double &PosRefStbd, double &PosRefBow, uint32_t &MothershipID, tN2kAISTransceiverInformation &AISInfo, uint8_t &SID ) {
   return ParseN2kPGN129810(N2kMsg, MessageID, Repeat, UserID, VesselType, Vendor, VendorBufSize, Callsign, CallsignBufSize,
 			   Length, Beam, PosRefStbd, PosRefBow, MothershipID, AISInfo, SID);
@@ -4882,7 +4882,7 @@ inline bool ParseN2kAISClassBStaticPartB(const tN2kMsg &N2kMsg, uint8_t &Message
  * of the source code. See parameter details on \ref ParseN2kPGN129810
  */
 inline bool ParseN2kAISClassBStaticPartB(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID,
-					 uint8_t &VesselType, char *Vendor, size_t VendorBufSize, char *Callsign, size_t CallsignBufSize, double &Length, double &Beam,
+					 uint8_t &VesselType, char *Vendor, uint32_t VendorBufSize, char *Callsign, uint32_t CallsignBufSize, double &Length, double &Beam,
 					 double &PosRefStbd, double &PosRefBow, uint32_t &MothershipID) {
   tN2kAISTransceiverInformation AISInfo;
   uint8_t SID;

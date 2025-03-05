@@ -288,7 +288,7 @@ bool tN2kGroupFunctionHandlerForPGN126996::HandleRequest(const tN2kMsg &N2kMsg,
     uint8_t field;
     tN2kGroupFunctionParameterErrorCode FieldErrorCode;
     bool FoundInvalidField=false;
-    size_t strSize=Max_N2kProductInfoStrLen;
+    uint32_t strSize=Max_N2kProductInfoStrLen;
     char Query[strSize];
     char CurVal[strSize];
 
@@ -393,7 +393,7 @@ bool tN2kGroupFunctionHandlerForPGN126998::HandleRequest(const tN2kMsg &N2kMsg,
     bool FoundInvalidField=false;
     char Query[Max_N2kConfigurationInfoField_len];
     char CurVal[Max_N2kConfigurationInfoField_len];
-    size_t QueryStrSize;
+    uint32_t QueryStrSize;
 
     StartParseRequestPairParameters(N2kMsg,Index);
     // Next read new field values. Note that if message is not broadcast, we need to parse all fields always.
@@ -458,7 +458,7 @@ bool tN2kGroupFunctionHandlerForPGN126998::HandleCommand(const tN2kMsg &N2kMsg, 
   int i;
   int Index;
   uint8_t field;
-  size_t InstallationDescriptionSize;
+  uint32_t InstallationDescriptionSize;
   char InstallationDescription[Max_N2kConfigurationInfoField_len];
   tN2kGroupFunctionTransmissionOrPriorityErrorCode pec=N2kgfTPec_Acknowledge;
   tN2kMsg N2kRMsg;

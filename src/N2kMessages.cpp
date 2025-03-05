@@ -64,7 +64,7 @@ void SetN2kPGN129802(tN2kMsg &N2kMsg, uint8_t MessageID, tN2kAISRepeat Repeat, u
 }
 
 bool ParseN2kPGN129802(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &SourceID,
-      tN2kAISTransceiverInformation &AISTransceiverInformation, char * SafetyRelatedText, size_t &SafetyRelatedTextMaxSize)
+      tN2kAISTransceiverInformation &AISTransceiverInformation, char * SafetyRelatedText, uint32_t &SafetyRelatedTextMaxSize)
 {
    if (N2kMsg.PGN!=129802L) return false;
 
@@ -1563,7 +1563,7 @@ bool ParseN2kPGN129041(const tN2kMsg &N2kMsg, tN2kAISAtoNReportData &N2kData) {
     N2kData.GNSSType = (tN2kGNSStype)((N2kMsg.GetByte(Index) >> 1) & 0x0f);
     N2kData.AtoNStatus=N2kMsg.GetByte(Index);  
     N2kData.AISTransceiverInformation = (tN2kAISTransceiverInformation)(N2kMsg.GetByte(Index) & 0x1f);
-    size_t AtoNNameSize = sizeof(N2kData.AtoNName);
+    uint32_t AtoNNameSize = sizeof(N2kData.AtoNName);
     N2kMsg.GetVarStr(AtoNNameSize, (char*)N2kData.AtoNName, Index);
 
     return true;
@@ -1716,9 +1716,9 @@ void SetN2kPGN129794(tN2kMsg &N2kMsg, uint8_t MessageID, tN2kAISRepeat Repeat, u
 }
 
 bool ParseN2kPGN129794(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID,
-		       uint32_t &IMOnumber, char *Callsign, size_t CallsignBufSize, char *Name, size_t NameBufSize,uint8_t &VesselType, double &Length,
+		       uint32_t &IMOnumber, char *Callsign, uint32_t CallsignBufSize, char *Name, uint32_t NameBufSize,uint8_t &VesselType, double &Length,
 		       double &Beam, double &PosRefStbd, double &PosRefBow, uint16_t &ETAdate, double &ETAtime,
-		       double &Draught, char *Destination, size_t DestinationBufSize, tN2kAISVersion &AISversion, tN2kGNSStype &GNSStype,
+		       double &Draught, char *Destination, uint32_t DestinationBufSize, tN2kAISVersion &AISversion, tN2kGNSStype &GNSStype,
 		       tN2kAISDTE &DTE, tN2kAISTransceiverInformation &AISinfo, uint8_t &SID)
 {
     if (N2kMsg.PGN!=129794L) return false;
@@ -1759,7 +1759,7 @@ void SetN2kPGN129809(tN2kMsg &N2kMsg, uint8_t MessageID, tN2kAISRepeat Repeat, u
     N2kMsg.AddByte(SID);
 }
 
-bool ParseN2kPGN129809(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID, char *Name, size_t NameBufSize,
+bool ParseN2kPGN129809(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID, char *Name, uint32_t NameBufSize,
 		       tN2kAISTransceiverInformation &AISInfo, uint8_t &SID)
 {
     if (N2kMsg.PGN!=129809L) return false;
@@ -1800,7 +1800,7 @@ void SetN2kPGN129810(tN2kMsg &N2kMsg, uint8_t MessageID, tN2kAISRepeat Repeat, u
 }
 
 bool ParseN2kPGN129810(const tN2kMsg &N2kMsg, uint8_t &MessageID, tN2kAISRepeat &Repeat, uint32_t &UserID,
-		       uint8_t &VesselType, char *Vendor, size_t VendorBufSize, char *Callsign, size_t CallsignBufSize, double &Length, double &Beam,
+		       uint8_t &VesselType, char *Vendor, uint32_t VendorBufSize, char *Callsign, uint32_t CallsignBufSize, double &Length, double &Beam,
 		       double &PosRefStbd, double &PosRefBow, uint32_t &MothershipID, tN2kAISTransceiverInformation &AISInfo, uint8_t &SID)
 {
     if (N2kMsg.PGN!=129810L) return false;
@@ -2109,8 +2109,8 @@ bool ParseN2kPGN130323(const tN2kMsg &N2kMsg, tN2kMeteorlogicalStationData &N2kD
     N2kData.WindGusts = N2kMsg.Get2ByteUDouble(0.01,Index);
     N2kData.AtmosphericPressure = N2kMsg.Get2ByteUDouble(100,Index);
     N2kData.OutsideAmbientAirTemperature=N2kMsg.Get2ByteUDouble(0.01,Index);
-    size_t StationIDSize = sizeof(N2kData.StationID);
-    size_t StationNameSize = sizeof(N2kData.StationName);
+    uint32_t StationIDSize = sizeof(N2kData.StationID);
+    uint32_t StationNameSize = sizeof(N2kData.StationName);
     N2kMsg.GetVarStr(StationIDSize, (char*)N2kData.StationID, Index);
     N2kMsg.GetVarStr(StationNameSize, (char*)N2kData.StationName, Index);
 

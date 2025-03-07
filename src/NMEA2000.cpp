@@ -1124,21 +1124,20 @@ bool tNMEA2000::Open() {
 
       for (int i=0; i<MaxN2kCANMsgs; i++) N2kCANMsgBuf[i].FreeMessage();
 
- /*
+
+
       #if !defined(N2K_NO_GROUP_FUNCTION_SUPPORT)
       // On first open try add also default group function handlers
-     // N2kGroupFunctionHandlerForPGN60928.SetNMEA(this);
+      N2kGroupFunctionHandlerForPGN60928.SetNMEA(this);
      
-      SetNMEA();(new tN2kGroupFunctionHandlerForPGN60928(this)); // NAME handler
-      AddGroupFunctionHandler(new tN2kGroupFunctionHandlerForPGN126464(this)); // Rx/Tx list handler
+      N2kGroupFunctionHandlerForPGN126464.SetNMEA(this); // Rx/Tx list handler
       #if !defined(N2K_NO_HEARTBEAT_SUPPORT)
-      AddGroupFunctionHandler(new tN2kGroupFunctionHandlerForPGN126993(this)); // Heartbeat handler
+      N2kGroupFunctionHandlerForPGN126993.SetNMEA(this); // Heartbeat handler
       #endif
-      AddGroupFunctionHandler(new tN2kGroupFunctionHandlerForPGN126996(this)); // Product information
-      AddGroupFunctionHandler(new tN2kGroupFunctionHandlerForPGN126998(this)); // Configuration information handler
-      AddGroupFunctionHandler(new tN2kGroupFunctionHandler(this,0)); // Default handler at last
+      N2kGroupFunctionHandlerForPGN126996.SetNMEA(this); // Product information
+      N2kGroupFunctionHandlerForPGN126998.SetNMEA(this); // Configuration information handler
+      N2kGroupFunctionHandler.SetNMEA(this); // Default handler at last
       #endif
-      */
     }
     OpenState=os_OpenCAN;
 

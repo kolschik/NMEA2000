@@ -550,6 +550,15 @@ class tN2kGroupFunctionHandler {
     tN2kGroupFunctionHandler(tNMEA2000 *_pNMEA2000, unsigned long _PGN);
 
     /**********************************************************************//**
+     * \brief Construct a new tN2kGroupFunctionHandler object
+     *
+     * \param _pNMEA2000  Pointer to an NMEA2000 object, see \ref tNMEA2000
+     * \param _PGN        Parameter Group Number associated with this 
+     *                    Group function
+     */
+    tN2kGroupFunctionHandler();
+
+    /**********************************************************************//**
      * \brief Handle group function message
      * 
      * Function parses group function PGN 126208 and forwards handling to specific

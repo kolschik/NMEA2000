@@ -105,7 +105,7 @@ public:
     #endif
     tN2kGroupFunctionHandlerForPGN126996 N2kGroupFunctionHandlerForPGN126996; // Product information
     tN2kGroupFunctionHandlerForPGN126998 N2kGroupFunctionHandlerForPGN126998; // Configuration information handler
-    tN2kGroupFunctionHandler N2kGroupFunctionHandler(); // Default handler at last    
+    tN2kGroupFunctionHandler N2kGroupFunctionHandler; // Default handler at last    
   /************************************************************************//**
    * \brief Check if the given PGN is proprietary
    *
@@ -466,9 +466,6 @@ public:
        * \param _Source Source address on the bus (default = 255)
        */
       tDevice(uint64_t _Name, uint8_t _Source=255) { Source=_Source; DevI.SetName(_Name); CreateTime=N2kMillis(); }
-      /*******************************************************************//**
-       * \brief Destroy the Device object */
-      virtual ~tDevice() {;}
 
       /** \brief Returns the Source Address of this device*/
       uint8_t GetSource() const { return Source; }
@@ -983,7 +980,7 @@ protected:
     tN2kGroupFunctionHandler *pGroupFunctionHandlers;
 #endif
 
-protected:
+private:
     /*********************************************************************//**
      * \brief Abstract class for sending a CAN Frame
      * 
@@ -1002,7 +999,7 @@ protected:
      * \retval true  Success
      * \retval false there is no space in the queue
     */
-    virtual bool CANSendFrame(unsigned long id, unsigned char len, const unsigned char *buf, bool wait_sent=true)=0;
+    bool CANSendFrame(unsigned long id, unsigned char len, const unsigned char *buf, bool wait_sent=true);
 
     /*********************************************************************//**
      * \brief Abstract class for initializing and opening CAN interface.
@@ -1017,7 +1014,7 @@ protected:
      * \retval true   Initialize and open success
      * \retval false  Initialize or open failed.
      */
-    virtual bool CANOpen()=0;
+    bool CANOpen();
 
     /*********************************************************************//**
      * \brief Abstract class for reading frame from driver class.
@@ -1032,7 +1029,7 @@ protected:
      * \retval true   New frame read from buffer.
      * \retval false  Nothing read. 
      */
-    virtual bool CANGetFrame(unsigned long &id, unsigned char &len, unsigned char *buf)=0;
+    bool CANGetFrame(unsigned long &id, unsigned char &len, unsigned char *buf);
     
     /*********************************************************************//**
      * \brief Initialize CAN Frame buffers
@@ -1056,10 +1053,7 @@ protected:
      *  - \ref tNMEA2000::SetN2kCANSendFrameBufSize()
      *  - \ref tNMEA2000::SetN2kCANReceiveFrameBufSize()
      */
-    virtual void InitCANFrameBuffers();
-#if defined(DEBUG_NMEA2000_ISR)
-    virtual void TestISR() {;}
-#endif
+    void InitCANFrameBuffers();
 
 protected:
     /**********************************************************************//**
@@ -1668,7 +1662,7 @@ public:
      * 
      * \param _MaxCANReceiveFrames {type} 
      */
-    virtual void SetN2kCANReceiveFrameBufSize(const uint16_t _MaxCANReceiveFrames) { if ( !IsInitialized() ) MaxCANReceiveFrames=_MaxCANReceiveFrames; }
+    void SetN2kCANReceiveFrameBufSize(const uint16_t _MaxCANReceiveFrames) { if ( !IsInitialized() ) MaxCANReceiveFrames=_MaxCANReceiveFrames; }
 
     /*********************************************************************//**
      * \brief Set the Product Information of this device.

@@ -25,6 +25,13 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "NMEA2000.h"
 
 #if !defined(N2K_NO_GROUP_FUNCTION_SUPPORT)
+tN2kGroupFunctionHandler::tN2kGroupFunctionHandler()
+  {
+  pNext=0;
+  pNMEA2000=nullptr;
+  PGN=0;
+  Proprietary=tNMEA2000::IsProprietaryMessage(PGN);
+}
 
 //*****************************************************************************
 tN2kGroupFunctionHandler::tN2kGroupFunctionHandler(tNMEA2000 *_pNMEA2000, unsigned long _PGN)  {

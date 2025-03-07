@@ -621,10 +621,6 @@ tNMEA2000::tNMEA2000() {
 
   for (int i=0; i<N2kMessageGroups; i++) {SingleFrameMessages[i]=0; FastPacketMessages[i]=0;}
 
-  N2kCANMsgBuf=0;
-  MaxN2kCANMsgs=0;
-
-  MaxCANSendFrames=(sizeof(CANSendFrameBuf)/sizeof(CANSendFrameBuf[0]))/2;
   MaxCANReceiveFrames=0; // Use driver default
   memset(CANSendFrameBuf, 0, sizeof(CANSendFrameBuf));
 
@@ -643,21 +639,19 @@ tNMEA2000::tNMEA2000() {
   SetProgmemConfigurationInformation(DefManufacturerInformation,
                                      DefInstallationDescription1,
                                      DefInstallationDescription2);
-  Devices=0;
   DeviceCount=1;
 }
 
 //*****************************************************************************
 void tNMEA2000::SetDeviceCount(const uint8_t _DeviceCount) {
-  // Note that we can set this only before any initialization. Limit count to 10.
-  if ( Devices==0 && _DeviceCount>=1 && _DeviceCount<3 ) DeviceCount=_DeviceCount;
+    if (_DeviceCount > (sizeof(Devices) / sizeof(Devices[0]))){
+        return;
+    }
+    DeviceCount=_DeviceCount;
 }
 
 //*****************************************************************************
 void tNMEA2000::InitDevices() {
-  if ( Devices==0 ) {
-    Devices = Devices_buf;
-    MaxCANSendFrames*=DeviceCount; // We need bigger buffer for sending all information
 //    for (int i=0; i<DeviceCount; i++) Devices[i].tDevice();
     // We set default device information here.
     for ( int i=0; i<DeviceCount; i++) { // Initialize all devices with some value
@@ -669,7 +663,6 @@ void tNMEA2000::InitDevices() {
                            i
                           );
     }
-  }
 }
 
 //*****************************************************************************
@@ -765,19 +758,18 @@ uint32_t tNMEA2000::GetFastPacketTxPGNCount(int iDev) {
 int tNMEA2000::GetSequenceCounter(unsigned long PGN, int iDev) {
   if ( !IsValidDevice(iDev) ) return 0;
 
-  if ( Devices[iDev].PGNSequenceCounters==0 ) { // Sequence counters has not yet been initialized
-    Devices[iDev].MaxPGNSequenceCounters=GetFastPacketTxPGNCount(iDev)+1; // Reserve 1 for undefined PGNs
-    Devices[iDev].PGNSequenceCounters=new unsigned long[Devices[iDev].MaxPGNSequenceCounters];
-    for ( uint32_t i=0; i<Devices[iDev].MaxPGNSequenceCounters; i++ ) Devices[iDev].PGNSequenceCounters[i]=0;
-  }
-  if ( Devices[iDev].PGNSequenceCounters==0 ) return 0; // Should not be. Only in case of memory allocation problem.
+  Devices[iDev].MaxPGNSequenceCounters=GetFastPacketTxPGNCount(iDev)+1; // Reserve 1 for undefined PGNs
+  for ( uint32_t i=0; i<Devices[iDev].MaxPGNSequenceCounters; i++ ) Devices[iDev].PGNSequenceCounters[i]=0;
+
   uint32_t last=Devices[iDev].MaxPGNSequenceCounters-1;
   unsigned long sc;
   for ( uint32_t i=0; i<last; i++ ) {
+    /*
     if ( Devices[iDev].PGNSequenceCounters[i]==0 ) { // Empty place, use this
       Devices[iDev].PGNSequenceCounters[i]=PGN;
       return 0; // Start from sequence 0
     }
+    */
     if ( (Devices[iDev].PGNSequenceCounters[i]&0x00ffffff) == PGN ) { // Found counter, use it
       sc=Devices[iDev].PGNSequenceCounters[i]>>24;
       sc++; if (sc>7) sc=0; // Get next counter
@@ -1130,14 +1122,14 @@ bool tNMEA2000::Open() {
     InitCANFrameBuffers();
     InitDevices();
 
-    if ( N2kCANMsgBuf==0 ) {
-      if ( MaxN2kCANMsgs==0 ) MaxN2kCANMsgs=5;
-      N2kCANMsgBuf = new tN2kCANMsg[MaxN2kCANMsgs];
       for (int i=0; i<MaxN2kCANMsgs; i++) N2kCANMsgBuf[i].FreeMessage();
 
+ /*
       #if !defined(N2K_NO_GROUP_FUNCTION_SUPPORT)
       // On first open try add also default group function handlers
-      AddGroupFunctionHandler(new tN2kGroupFunctionHandlerForPGN60928(this)); // NAME handler
+     // N2kGroupFunctionHandlerForPGN60928.SetNMEA(this);
+     
+      SetNMEA();(new tN2kGroupFunctionHandlerForPGN60928(this)); // NAME handler
       AddGroupFunctionHandler(new tN2kGroupFunctionHandlerForPGN126464(this)); // Rx/Tx list handler
       #if !defined(N2K_NO_HEARTBEAT_SUPPORT)
       AddGroupFunctionHandler(new tN2kGroupFunctionHandlerForPGN126993(this)); // Heartbeat handler
@@ -1146,9 +1138,10 @@ bool tNMEA2000::Open() {
       AddGroupFunctionHandler(new tN2kGroupFunctionHandlerForPGN126998(this)); // Configuration information handler
       AddGroupFunctionHandler(new tN2kGroupFunctionHandler(this,0)); // Default handler at last
       #endif
+      */
     }
     OpenState=os_OpenCAN;
-  }
+
 
   if ( OpenState==os_OpenCAN ) {
     if ( !OpenScheduler.IsTime() ) return false;
@@ -1242,7 +1235,7 @@ bool tNMEA2000::SendFrames()
   uint16_t temp;
 
   while (CANSendFrameBufferRead!=CANSendFrameBufferWrite) {
-    temp = (CANSendFrameBufferRead + 1) % MaxCANSendFrames;
+    temp = (CANSendFrameBufferRead + 1) % MaxN2kTxFrames;
     if ( CANSendFrame(CANSendFrameBuf[temp].id, CANSendFrameBuf[temp].len, CANSendFrameBuf[temp].buf, CANSendFrameBuf[temp].wait_sent) ) {
       CANSendFrameBufferRead=temp;
     } else return false;
@@ -1335,7 +1328,7 @@ void tNMEA2000::SendHeartbeat(bool force) {
 
 //*****************************************************************************
 tNMEA2000::tCANSendFrame *tNMEA2000::GetNextFreeCANSendFrame() {
-  uint16_t temp = (CANSendFrameBufferWrite + 1) % MaxCANSendFrames;
+  uint16_t temp = (CANSendFrameBufferWrite + 1) % MaxN2kTxFrames;
 
   if (temp != CANSendFrameBufferRead) {
     CANSendFrameBufferWrite = temp;

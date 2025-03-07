@@ -57,7 +57,7 @@ public:
    * to be send.*/
   tN2kMsg N2kMsg;
   /** \brief Message ready for handling?   */
-  bool Ready;
+  uint8_t Ready;
   /** \brief Message is free for fill up   */
   bool FreeMsg; 
   /** \brief Message is a system message*/

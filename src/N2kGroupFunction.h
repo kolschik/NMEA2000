@@ -301,6 +301,7 @@ class tN2kGroupFunctionHandler {
       ErrorCode = ( Match ? N2kgfpec_Acknowledge : N2kgfpec_RequestOrCommandParameterOutOfRange );
     }
 
+    void SetNMEA(tNMEA2000 *_pNMEA2000) {pNMEA2000=_pNMEA2000;}
   private:
     /** \brief Pointer to the Group function handler */
     tN2kGroupFunctionHandler *pNext;

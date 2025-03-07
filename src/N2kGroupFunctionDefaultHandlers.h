@@ -69,7 +69,7 @@ class tN2kGroupFunctionHandlerForPGN60928 : public tN2kGroupFunctionHandler {
                                int iDev);
     virtual bool HandleCommand(const tN2kMsg &N2kMsg, uint8_t PrioritySetting, uint8_t NumberOfParameterPairs, int iDev);
   public:
-    tN2kGroupFunctionHandlerForPGN60928(tNMEA2000 *_pNMEA2000) : tN2kGroupFunctionHandler(_pNMEA2000,60928L) {}
+    tN2kGroupFunctionHandlerForPGN60928() : tN2kGroupFunctionHandler(nullptr,60928L) {}
 };
 
 
@@ -94,7 +94,7 @@ class tN2kGroupFunctionHandlerForPGN126464 : public tN2kGroupFunctionHandler {
                                uint8_t  NumberOfParameterPairs,
                                int iDev);
   public:
-    tN2kGroupFunctionHandlerForPGN126464(tNMEA2000 *_pNMEA2000) : tN2kGroupFunctionHandler(_pNMEA2000,126464L) {}
+    tN2kGroupFunctionHandlerForPGN126464(tNMEA2000 *_pNMEA2000=nullptr) : tN2kGroupFunctionHandler(_pNMEA2000,126464L) {}
 };
 
 #if !defined(N2K_NO_HEARTBEAT_SUPPORT)    
@@ -122,7 +122,7 @@ class tN2kGroupFunctionHandlerForPGN126993 : public tN2kGroupFunctionHandler {
                                int iDev);
     virtual bool HandleCommand(const tN2kMsg &N2kMsg, uint8_t PrioritySetting, uint8_t NumberOfParameterPairs, int iDev);
   public:
-    tN2kGroupFunctionHandlerForPGN126993(tNMEA2000 *_pNMEA2000) : tN2kGroupFunctionHandler(_pNMEA2000,126993L) {}
+    tN2kGroupFunctionHandlerForPGN126993(tNMEA2000 *_pNMEA2000=nullptr) : tN2kGroupFunctionHandler(_pNMEA2000,126993L) {}
 };
 #endif
 
@@ -145,7 +145,7 @@ class tN2kGroupFunctionHandlerForPGN126996 : public tN2kGroupFunctionHandler {
                                uint8_t  NumberOfParameterPairs,
                                int iDev);
   public:
-    tN2kGroupFunctionHandlerForPGN126996(tNMEA2000 *_pNMEA2000) : tN2kGroupFunctionHandler(_pNMEA2000,126996L) {}
+    tN2kGroupFunctionHandlerForPGN126996(tNMEA2000 *_pNMEA2000=nullptr) : tN2kGroupFunctionHandler(_pNMEA2000,126996L) {}
 };
 
 /************************************************************************//**
@@ -169,7 +169,7 @@ class tN2kGroupFunctionHandlerForPGN126998 : public tN2kGroupFunctionHandler {
                                int iDev);
     virtual bool HandleCommand(const tN2kMsg &N2kMsg, uint8_t PrioritySetting, uint8_t NumberOfParameterPairs, int iDev);
   public:
-    tN2kGroupFunctionHandlerForPGN126998(tNMEA2000 *_pNMEA2000) : tN2kGroupFunctionHandler(_pNMEA2000,126998L) {}
+    tN2kGroupFunctionHandlerForPGN126998(tNMEA2000 *_pNMEA2000=nullptr) : tN2kGroupFunctionHandler(_pNMEA2000,126998L) {}
 };
 
 #endif

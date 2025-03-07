@@ -8,6 +8,7 @@
 
 #if !defined(N2K_NO_GROUP_FUNCTION_SUPPORT)
 #include "N2kGroupFunction.h"
+#include "N2kGroupFunctionDefaultHandlers.h"
 #endif
 /** \brief PGN for an ISO Address Claim message */
 #define N2kPGNIsoAddressClaim 60928L
@@ -15,6 +16,10 @@
 #define N2kPGNProductInformation 126996L
 /** \brief PGN for an Configuration Information message */
 #define N2kPGNConfigurationInformation 126998L
+
+#define MaxN2kCANMsgs 2
+#define MaxN2kDevices 1
+#define MaxN2kTxFrames 32
 
 // Document says for lengths 33,40,24,32, but then values
 // has not been translated right on devices.
@@ -91,6 +96,16 @@
 class tNMEA2000
 {
 public:
+    tN2kGroupFunctionHandlerForPGN60928 N2kGroupFunctionHandlerForPGN60928;
+
+    tN2kGroupFunctionHandlerForPGN126464 N2kGroupFunctionHandlerForPGN126464;
+
+    #if !defined(N2K_NO_HEARTBEAT_SUPPORT)
+    tN2kGroupFunctionHandlerForPGN126993 N2kGroupFunctionHandlerForPGN126993; // Heartbeat handler
+    #endif
+    tN2kGroupFunctionHandlerForPGN126996 N2kGroupFunctionHandlerForPGN126996; // Product information
+    tN2kGroupFunctionHandlerForPGN126998 N2kGroupFunctionHandlerForPGN126998; // Configuration information handler
+    tN2kGroupFunctionHandler N2kGroupFunctionHandler(); // Default handler at last    
   /************************************************************************//**
    * \brief Check if the given PGN is proprietary
    *
@@ -724,9 +739,9 @@ protected:
      * PGNs for this device*/
     const unsigned long *ReceiveMessages;
     /** \brief Fast packet PGNs sequence counters*/
-    unsigned long *PGNSequenceCounters;
+    unsigned long PGNSequenceCounters[16];
     /** \brief Fast packet PGNs sequence counters*/
-    uint32_t MaxPGNSequenceCounters;
+    uint8_t MaxPGNSequenceCounters;
     /** \brief Holds the highest source address for Address Claim process*/
     uint8_t AddressClaimEndSource;
     /** \brief internal device has pending information*/
@@ -761,7 +776,7 @@ protected:
       ManufacturerSerialCode=0;
       AddressClaimEndSource=N2kMaxCanBusAddress; //GetNextAddressFromBeginning=true;
       TransmitMessages=0; ReceiveMessages=0;
-      PGNSequenceCounters=0; MaxPGNSequenceCounters=0;
+      PGNSequenceCounters; MaxPGNSequenceCounters=0;
 #if !defined(N2K_NO_ISO_MULTI_PACKET_SUPPORT)
       NextDTSequence=0;
 #endif
@@ -885,10 +900,10 @@ protected:
     bool DeviceInformationChanged;
 
     /** \brief  Pointer to a buffer for all internal devices */
-    tInternalDevice *Devices;
-    tInternalDevice Devices_buf[2];
+    tInternalDevice Devices[MaxN2kDevices];
+
     /** \brief  Number of devices */
-    int DeviceCount;
+    uint8_t DeviceCount;
 //    unsigned long N2kSource[Max_N2kDevices];
 
     /** \brief  Pointer to a buffer for local Configuration Information*/
@@ -921,18 +936,14 @@ protected:
     };
 
 protected:
+
     /** \brief Buffer for receiving messages
      * \sa
      *  - \ref MaxN2kCANMsgs
      *  - \ref tNMEA2000::SetN2kCANMsgBufSize()
     */
-    tN2kCANMsg *N2kCANMsgBuf;
-    /** \brief Size of N2kCANMsgBuf receiving message buffer
-     * \sa 
-     * - \ref N2kCANMsgBuf
-     * - \ref tNMEA2000::SetN2kCANMsgBufSize()
-     */
-    uint8_t MaxN2kCANMsgs;
+    tN2kCANMsg N2kCANMsgBuf[MaxN2kCANMsgs];
+
 
     /** \brief Buffer for library send out CAN frames
      * 
@@ -946,21 +957,8 @@ protected:
      * 
      * \ref InitCANFrameBuffers(). 
     */
-    tCANSendFrame CANSendFrameBuf[16];
-    /** \brief Size of CANSendFrameBuf or before initialization requested
-     *         total frame buffering size.
-     * 
-     * Member has two function. On setup program can request
-     * \ref tNMEA2000::SetN2kCANSendFrameBufSize, which will be saved to this member.
-     * Inherited tNMEA2000::InitCANFrameBuffers can split size to driver buffer and
-     * library buffer.
-     * 
-     * \sa
-     *  - \ref tNMEA2000::SetN2kCANSendFrameBufSize()
-     *  - \ref CANSendFrameBuf
-     *  - \ref InitCANFrameBuffers()
-     */
-    uint16_t MaxCANSendFrames;
+    tCANSendFrame CANSendFrameBuf[MaxN2kDevices * MaxN2kTxFrames];
+
     /** \brief  Next read index for the library CAN send frame buffer.
      */
     uint16_t CANSendFrameBufferWrite;
@@ -1651,44 +1649,9 @@ public:
      * \param _MaxN2kCANMsgs  Number of CAN messages that can be 
      *                        stored in \ref tNMEA2000::N2kCANMsgBuf
      */
-    void SetN2kCANMsgBufSize(const uint8_t _MaxN2kCANMsgs) { if (N2kCANMsgBuf==0) { MaxN2kCANMsgs=_MaxN2kCANMsgs; }; }
-
-    /*********************************************************************//**
-     * \brief Set CAN send frame buffer size.
-     * 
-     * With this function you can set size of buffer, where system saves 
-     * frames of messages to be sent. Given buffer size will be devided
-     * to driver buffer and library buffer. Driver buffer will empty by
-     * driver interrupt and library buffer by call to SendMsg or
-     * ParseMessages, which moves frames to driver buffer. If driver
-     * can handle large buffer, library buffer will be set to minimum.
-     *
-     * When sending long messages like ProductInformation or GNSS data, 
-     * there may not be enough buffers for successfully send data. This 
-     * depends of your hw and device source. Device source has effect due 
-     * to priority of getting sending time. If your data is critical, use 
-     * buffer size, which is large enough (default 40 frames).
-     *
-     * E.g. Product information takes totally 134 bytes. This needs 20 
-     * frames. If you also send GNSS 47 bytes=7 frames.
-     * If you want to be sure that both will be sent on any situation, 
-     * you need at least 27 frame buffer size.
-     * 
-     * If you use this function, call it once before \ref tNMEA2000::Open() and 
-     * before any device related function like tNMEA2000::SetProductInformation.
-     * If you call it later, function has no effect.
-     *
-     * Driver may override your setting, if you set too small or too large
-     * buffer size. This is driver dependent behaviour.
-     * 
-     * \sa 
-     *  - \ref tNMEA2000::SendMsg
-     *  - \ref tNMEA2000::ParseMessages
-     * 
-     * \param _MaxCANSendFrames Maximum number of CAN frames that can be buffered
-     *                          in \ref tNMEA2000::CANSendFrameBuf
-     */
-    virtual void SetN2kCANSendFrameBufSize(const uint16_t _MaxCANSendFrames) { if ( !IsInitialized() ) { MaxCANSendFrames=_MaxCANSendFrames; }; }
+    void SetN2kCANMsgBufSize(const uint8_t _MaxN2kCANMsgs) { 
+      //if (N2kCANMsgBuf==0) { MaxN2kCANMsgs=_MaxN2kCANMsgs; }; 
+      }
 
     /*********************************************************************//**
      * \brief Set CAN receive frame buffer size.

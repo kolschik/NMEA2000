@@ -709,7 +709,7 @@ public:
    * With fast packet the first frame can have 6 byte and rest 31 frames
    * 7 bytes.
    */
-  static const int MaxDataLen=223;
+  static const uint8_t MaxDataLen=223;
   /** \brief Priority of the NMEA2000 message*/
   unsigned char Priority;
   /** \brief Parameter Group Number (PGN) of the NMEA2000 message*/

@@ -182,7 +182,7 @@ bool IsFastPacketSystemMessage(unsigned long PGN) {
  *              - 127501L: Binary status report, pri=3, period=NA
  *              - 127505L: Fluid level, pri=6, period=2500
  *              - 127508L: Battery Status, pri=6, period=1500
- *              - 127750L: Charger status new, pri=6, period=1500
+ *              - 127750L: Charger status New, pri=6, period=1500
  *              - 128259L: Boat speed, pri=2, period=1000
  *              - 128267L: Water depth, pri=3, period=1000
  *              - 129025L: Lat/lon rapid, pri=2, period=100
@@ -214,7 +214,7 @@ bool IsDefaultSingleFrameMessage(unsigned long PGN) {
                                       case 127501L: // Binary status report, pri=3, period=NA
                                       case 127505L: // Fluid level, pri=6, period=2500
                                       case 127508L: // Battery Status, pri=6, period=1500
-                                      case 127750L: // Charger status new, pri=6, period=1500
+                                      case 127750L: // Charger status New, pri=6, period=1500
                                       case 128259L: // Boat speed, pri=2, period=1000
                                       case 128267L: // Water depth, pri=3, period=1000
                                       case 129025L: // Lat/lon rapid, pri=2, period=100
@@ -2544,11 +2544,11 @@ void tNMEA2000::AddGroupFunctionHandler(tN2kGroupFunctionHandler *pGroupFunction
     for (pLastGroupFunctionHandler = pGroupFunctionHandlers;
       pLastGroupFunctionHandler->pNext != 0 && pLastGroupFunctionHandler->pNext->PGN != 0;
       pLastGroupFunctionHandler = pLastGroupFunctionHandler->pNext);
-    // Insert the new handler before the default handler if the default handler is present.
+    // Insert the New handler before the default handler if the default handler is present.
     if ( pLastGroupFunctionHandler->pNext != 0 && pLastGroupFunctionHandler->pNext->PGN == 0 ) {
       pGroupFunctionHandler->pNext = pLastGroupFunctionHandler->pNext;
     }
-    // Add the new handler to the list.
+    // Add the New handler to the list.
     pLastGroupFunctionHandler->pNext = pGroupFunctionHandler;
   }
 }

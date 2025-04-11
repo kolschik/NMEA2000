@@ -280,7 +280,7 @@ void tN2kDeviceList::HandleIsoAddressClaim(const tN2kMsg &N2kMsg) {
   if ( pDevice==0 ) {
     // New or changed source
     pDevice=LocalFindDeviceByName(CallerName);
-    if ( pDevice!=0 ) { // Address changed, simply move device to new place.
+    if ( pDevice!=0 ) { // Address changed, simply move device to New place.
       Sources[pDevice->GetSource()]=0;
       SaveDevice(pDevice,N2kMsg.Source);
     } else { // New device
@@ -416,7 +416,7 @@ char * tN2kDeviceList::tInternalDevice::InitConfigurationInformation(uint32_t &_
   if ( _InstDesc1Size>0 ) _InstDesc1Size++; // Reserve '/0' terminator
   if ( _InstDesc2Size>0 ) _InstDesc2Size++; // Reserve '/0' terminator
   uint16_t _ConfISize=_ManISize+_InstDesc1Size+_InstDesc2Size;
-  if ( ConfI!=0 && ConfISize<_ConfISize ) { // We can not fit new data, so release mem.
+  if ( ConfI!=0 && ConfISize<_ConfISize ) { // We can not fit New data, so release mem.
     free(ConfI); ConfI=0; ConfISize=0;
   }
   if ( ConfI==0 ) {

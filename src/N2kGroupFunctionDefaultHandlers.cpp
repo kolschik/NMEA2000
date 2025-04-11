@@ -66,7 +66,7 @@ bool tN2kGroupFunctionHandlerForPGN60928::HandleRequest(const tN2kMsg &N2kMsg,
     bool FoundInvalidField=false;
 
     StartParseRequestPairParameters(N2kMsg,Index);
-    // Next read new field values. Note that if message is not broadcast, we need to parse all fields always.
+    // Next read New field values. Note that if message is not broadcast, we need to parse all fields always.
     for (i=0; i<NumberOfParameterPairs && (MatchFilter || !tNMEA2000::IsBroadcast(N2kMsg.Destination)); i++) {
       if ( !FoundInvalidField) {
         field=N2kMsg.GetByte(Index);
@@ -151,7 +151,7 @@ bool tN2kGroupFunctionHandlerForPGN60928::HandleCommand(const tN2kMsg &N2kMsg, u
 
     if (PrioritySetting!=8) pec=N2kgfTPec_TransmitIntervalOrPriorityNotSupported;
     StartParseCommandPairParameters(N2kMsg,Index);
-    // Next read new field values
+    // Next read New field values
     for (i=0; i<NumberOfParameterPairs; i++) {
       field=N2kMsg.GetByte(Index);
       PARec=N2kgfpec_Acknowledge;
@@ -206,7 +206,7 @@ bool tN2kGroupFunctionHandlerForPGN126464::HandleRequest(const tN2kMsg &N2kMsg,
     bool FoundInvalidField=false;
 
     StartParseRequestPairParameters(N2kMsg,Index);
-    // Next read new field values. Note that if message is not broadcast, we need to parse all fields always.
+    // Next read New field values. Note that if message is not broadcast, we need to parse all fields always.
     for (i=0; i<NumberOfParameterPairs && (MatchFilter || !tNMEA2000::IsBroadcast(N2kMsg.Destination)); i++) {
       if ( !FoundInvalidField) {
         field=N2kMsg.GetByte(Index);
@@ -293,7 +293,7 @@ bool tN2kGroupFunctionHandlerForPGN126996::HandleRequest(const tN2kMsg &N2kMsg,
     char CurVal[strSize];
 
     StartParseRequestPairParameters(N2kMsg,Index);
-    // Next read new field values. Note that if message is not broadcast, we need to parse all fields always.
+    // Next read New field values. Note that if message is not broadcast, we need to parse all fields always.
     for (i=0; i<NumberOfParameterPairs && (MatchFilter || !tNMEA2000::IsBroadcast(N2kMsg.Destination)); i++) {
       if ( !FoundInvalidField) {
         field=N2kMsg.GetByte(Index);
@@ -396,7 +396,7 @@ bool tN2kGroupFunctionHandlerForPGN126998::HandleRequest(const tN2kMsg &N2kMsg,
     uint32_t QueryStrSize;
 
     StartParseRequestPairParameters(N2kMsg,Index);
-    // Next read new field values. Note that if message is not broadcast, we need to parse all fields always.
+    // Next read New field values. Note that if message is not broadcast, we need to parse all fields always.
     for (i=0; i<NumberOfParameterPairs && (MatchFilter || !tNMEA2000::IsBroadcast(N2kMsg.Destination)); i++) {
       if ( !FoundInvalidField) {
         field=N2kMsg.GetByte(Index);
@@ -471,7 +471,7 @@ bool tN2kGroupFunctionHandlerForPGN126998::HandleCommand(const tN2kMsg &N2kMsg, 
                         NumberOfParameterPairs);
 
     StartParseCommandPairParameters(N2kMsg,Index);
-    // Next read new field values
+    // Next read New field values
     for (i=0; i<NumberOfParameterPairs; i++) {
       field=N2kMsg.GetByte(Index);
       switch (field) {

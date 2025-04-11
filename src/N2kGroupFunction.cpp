@@ -123,7 +123,7 @@ tN2kGroupFunctionTransmissionOrPriorityErrorCode tN2kGroupFunctionHandler::GetRe
                               ) {
   // On NMEA certification tests "C.3.13.2  Expanded Acknowledgment 
   // Message Timing" old tool does not know interval 0xFFFFFFFE=Restore Default Interval
-  // and so fails test. Use new test tool sw version or comment that out.
+  // and so fails test. Use New test tool sw version or comment that out.
   return ( (TransmissionInterval==0xFFFFFFFF     // No change
             || TransmissionInterval==0xFFFFFFFE  // Restore default
             || TransmissionInterval==0           // Turn off

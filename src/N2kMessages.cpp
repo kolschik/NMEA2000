@@ -1348,7 +1348,7 @@ bool AppendN2kPGN129540(tN2kMsg& N2kMsg, const tSatelliteInfo& SatelliteInfo) {
   NumberOfSVs++;
   Index=2;
   N2kMsg.SetByte(NumberOfSVs, Index);  // increment the number satellites
-  // add the new satellite info
+  // add the New satellite info
   N2kMsg.AddByte(SatelliteInfo.PRN);            
   N2kMsg.Add2ByteDouble(SatelliteInfo.Elevation,1e-4L);
   N2kMsg.Add2ByteUDouble(SatelliteInfo.Azimuth,1e-4L);
@@ -1676,7 +1676,7 @@ bool AppendN2kPGN129285(tN2kMsg &N2kMsg, uint16_t ID, const char* Name, double L
         NumItems = N2kMsg.Get2ByteUInt(NumItemsIdx);      // get and increment the number of items
         NumItemsIdx = 2;
         N2kMsg.Set2ByteUInt(++NumItems, NumItemsIdx);     // increment the number of items
-        N2kMsg.Add2ByteUInt(ID);                          // add the new item
+        N2kMsg.Add2ByteUInt(ID);                          // add the New item
         N2kMsg.AddVarStr(Name);
         N2kMsg.Add4ByteDouble(Latitude,1e-07);
         N2kMsg.Add4ByteDouble(Longitude,1e-07);

@@ -345,7 +345,7 @@ public:
          * function. Group function handling is build in the library.
         */
         unsigned char IndustryGroupAndSystemInstance; 
-      };
+      }devStr;
     } tUnionDeviceInformation;
 
     /** \brief Union that contains all the Device Information  */
@@ -361,100 +361,100 @@ public:
      * \brief Set a unique Number to the Device Information
      * \param _UniqueNumber   a unique number for the device (max 21 bits)
      */
-    void SetUniqueNumber(uint32_t _UniqueNumber) { DeviceInformation.UnicNumberAndManCode=(DeviceInformation.UnicNumberAndManCode&0xffe00000) | (_UniqueNumber&0x1fffff); }
+    void SetUniqueNumber(uint32_t _UniqueNumber) { DeviceInformation.devStr.UnicNumberAndManCode=(DeviceInformation.devStr.UnicNumberAndManCode&0xffe00000) | (_UniqueNumber&0x1fffff); }
 
     /*******************************************************************//**
      * \brief Get the unique Number from the Device Information
      * \return uint32_t 
      */
-    uint32_t GetUniqueNumber() const { return DeviceInformation.UnicNumberAndManCode&0x1fffff; }
+    uint32_t GetUniqueNumber() const { return DeviceInformation.devStr.UnicNumberAndManCode&0x1fffff; }
     
     /*******************************************************************//**
      * \brief Set the Manufacturer Code to the Device Information
      * \param _ManufacturerCode Manufacturer Code (max 11 bits)
      */
-    void SetManufacturerCode(uint16_t _ManufacturerCode) { DeviceInformation.UnicNumberAndManCode=(DeviceInformation.UnicNumberAndManCode&0x1fffff) | (((unsigned long)(_ManufacturerCode&0x7ff))<<21); }
+    void SetManufacturerCode(uint16_t _ManufacturerCode) { DeviceInformation.devStr.UnicNumberAndManCode=(DeviceInformation.devStr.UnicNumberAndManCode&0x1fffff) | (((unsigned long)(_ManufacturerCode&0x7ff))<<21); }
 
     /*******************************************************************//**
      * \brief Get the Manufacturer Code from the Device Information
      * \return uint16_t 
      */
-    uint16_t GetManufacturerCode() const { return DeviceInformation.UnicNumberAndManCode>>21; }
+    uint16_t GetManufacturerCode() const { return DeviceInformation.devStr.UnicNumberAndManCode>>21; }
 
     /*******************************************************************//**
      * \brief Set the Device Instance to the Device Information
      * \param _DeviceInstance   Instance for the device
      */
-    void SetDeviceInstance(unsigned char _DeviceInstance) { DeviceInformation.DeviceInstance=_DeviceInstance; }
+    void SetDeviceInstance(unsigned char _DeviceInstance) { DeviceInformation.devStr.DeviceInstance=_DeviceInstance; }
 
     /*******************************************************************//**
      * \brief Get the Device Instance from the Device Information
      * \return unsigned char 
      */
-    unsigned char GetDeviceInstance() const { return DeviceInformation.DeviceInstance; }
+    unsigned char GetDeviceInstance() const { return DeviceInformation.devStr.DeviceInstance; }
 
     /*******************************************************************//**
      * \brief Get the Device Instance (lower bits) from the Device Information
      * \return unsigned char 
      */
-    unsigned char GetDeviceInstanceLower() const { return DeviceInformation.DeviceInstance & 0x07; }
+    unsigned char GetDeviceInstanceLower() const { return DeviceInformation.devStr.DeviceInstance & 0x07; }
     /*******************************************************************//**
      * \brief Get the Device Instance (upper bits) from the Device Information
      * \return unsigned char 
      */
-    unsigned char GetDeviceInstanceUpper() const { return (DeviceInformation.DeviceInstance>>3) & 0x1f; }
+    unsigned char GetDeviceInstanceUpper() const { return (DeviceInformation.devStr.DeviceInstance>>3) & 0x1f; }
 
     /*******************************************************************//**
      * \brief Set the Device Function to the Device Information
      * \param _DeviceFunction   Device function code, \ref 
      * tDeviceInformation::tUnionDeviceInformation::DeviceFunction
      */
-    void SetDeviceFunction(unsigned char _DeviceFunction) { DeviceInformation.DeviceFunction=_DeviceFunction; }
+    void SetDeviceFunction(unsigned char _DeviceFunction) { DeviceInformation.devStr.DeviceFunction=_DeviceFunction; }
 
     /*******************************************************************//**
      * \brief Get the Device Function from the Device Information
      * \return  unsigned char ->  Device function code, \ref 
      * tDeviceInformation::tUnionDeviceInformation::DeviceFunction
      */
-    unsigned char GetDeviceFunction() const { return DeviceInformation.DeviceFunction; }
+    unsigned char GetDeviceFunction() const { return DeviceInformation.devStr.DeviceFunction; }
     
     /*******************************************************************//**
      * \brief Set the Device Class to the Device Information
      * \param _DeviceClass   Device class code, \ref 
      * tDeviceInformation::tUnionDeviceInformation::DeviceClass
      */
-    void SetDeviceClass(unsigned char _DeviceClass) { DeviceInformation.DeviceClass=((_DeviceClass&0x7f)<<1); }
+    void SetDeviceClass(unsigned char _DeviceClass) { DeviceInformation.devStr.DeviceClass=((_DeviceClass&0x7f)<<1); }
         
     /*******************************************************************//**
      * \brief Get the Device Class from the Device Information
      * \return  unsigned char ->  Device class code, \ref 
      * tDeviceInformation::tUnionDeviceInformation::DeviceClass
      */
-    unsigned char GetDeviceClass() const { return DeviceInformation.DeviceClass>>1; }
+    unsigned char GetDeviceClass() const { return DeviceInformation.devStr.DeviceClass>>1; }
 
     /********************************************************************//**
      * \brief Set the Industry Group to the Device Information
      * \param _IndustryGroup    Industry Group
      */
-    void SetIndustryGroup(unsigned char _IndustryGroup) { DeviceInformation.IndustryGroupAndSystemInstance=(DeviceInformation.IndustryGroupAndSystemInstance&0x0f) | (_IndustryGroup<<4) | 0x80; }
+    void SetIndustryGroup(unsigned char _IndustryGroup) { DeviceInformation.devStr.IndustryGroupAndSystemInstance=(DeviceInformation.devStr.IndustryGroupAndSystemInstance&0x0f) | (_IndustryGroup<<4) | 0x80; }
     
     /********************************************************************//**
      * \brief Get the Industry Group from the Device Information
      * \return unsigned char 
      */
-    unsigned char GetIndustryGroup() const { return (DeviceInformation.IndustryGroupAndSystemInstance>>4) & 0x07; }
+    unsigned char GetIndustryGroup() const { return (DeviceInformation.devStr.IndustryGroupAndSystemInstance>>4) & 0x07; }
 
     /********************************************************************//**
      * \brief Set the System Instance to the Device Information
      * \param _SystemInstance    System Instance 
      */
-    void SetSystemInstance(unsigned char _SystemInstance) { DeviceInformation.IndustryGroupAndSystemInstance=(DeviceInformation.IndustryGroupAndSystemInstance&0xf0) | (_SystemInstance&0x0f); }
+    void SetSystemInstance(unsigned char _SystemInstance) { DeviceInformation.devStr.IndustryGroupAndSystemInstance=(DeviceInformation.devStr.IndustryGroupAndSystemInstance&0xf0) | (_SystemInstance&0x0f); }
     
     /********************************************************************//**
      * \brief Get the System Instance from the Device Information
      * \return unsigned char 
      */
-    unsigned char GetSystemInstance() const { return DeviceInformation.IndustryGroupAndSystemInstance&0x0f; }
+    unsigned char GetSystemInstance() const { return DeviceInformation.devStr.IndustryGroupAndSystemInstance&0x0f; }
     /*** ****************************************************************//**
      * \brief Get the Name from the Device Information
      * \return uint64_t 

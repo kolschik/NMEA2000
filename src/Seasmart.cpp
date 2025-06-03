@@ -99,9 +99,10 @@ size_t N2kToSeasmart(const tN2kMsg &msg, uint32_t timestamp, char *buffer, size_
  *
  * Returns true if successful, false otherwise.
  */
-static bool readNHexByte(const char *s, unsigned int n, uint32_t &value) {
+static bool readNHexByte(const char *s, const unsigned int n, uint32_t &value) {
+  const uint32_t array_size = 63;
   value=(uint32_t)(-1); // required to avoid warning about uninitialized variable.
-  if (strlen(s) < 2*n) {
+  if ((strlen(s) < 2*n) || (2*n >= array_size)){
     return false;
   }
   for (unsigned int i = 0; i < 2*n; i++) {
@@ -110,7 +111,7 @@ static bool readNHexByte(const char *s, unsigned int n, uint32_t &value) {
     }
   }
 
-  char sNumber[2*n + 1];
+  char sNumber[array_size];
   strncpy(sNumber, s, sizeof(sNumber));
   sNumber[sizeof(sNumber) - 1] = 0;
 

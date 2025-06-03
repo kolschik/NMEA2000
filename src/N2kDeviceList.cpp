@@ -32,8 +32,8 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # define N2kHandleInDbg(fmt, args...)     DebugStream.print (fmt , ## args)
 # define N2kHandleInDbgln(fmt, args...)   DebugStream.println (fmt , ## args)
 #else
-# define N2kHandleInDbg(fmt, args...)
-# define N2kHandleInDbgln(fmt, args...)
+# define N2kHandleInDbg(fmt, ...)
+# define N2kHandleInDbgln(fmt, ...)
 #endif
 
 //*****************************************************************************

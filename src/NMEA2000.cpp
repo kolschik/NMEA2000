@@ -804,7 +804,7 @@ void tNMEA2000::SetProductInformation(const char *_ModelSerialCode,
 void tNMEA2000::SetConfigurationInformation(const char *ManufacturerInformation,
                                             const char *InstallationDescription1,
                                             const char *InstallationDescription2) {
-  if ( LocalConfigurationInformationData!=0 ) free(LocalConfigurationInformationData); // This happens on second call, which is not good.
+                                              
   LocalConfigurationInformationData=0;
 
   size_t ManInfoLen=(ManufacturerInformation?strlen(ManufacturerInformation)+1:0);
@@ -820,10 +820,7 @@ void tNMEA2000::SetConfigurationInformation(const char *ManufacturerInformation,
   if ( InstDesc1Len>Max_N2kConfigurationInfoField_len ) InstDesc1Len=Max_N2kConfigurationInfoField_len;
   if ( InstDesc2Len>Max_N2kConfigurationInfoField_len ) InstDesc2Len=Max_N2kConfigurationInfoField_len;
 
-  size_t TotalSize=ManInfoLen+InstDesc1Len+InstDesc2Len;
-  void *mem=(TotalSize>0?malloc(TotalSize):0);
-
-  LocalConfigurationInformationData=(char*)mem;
+  LocalConfigurationInformationData = LocalConfigurationInformationData_static;
   char *Info=LocalConfigurationInformationData;
 
   SetCharBuf(InstallationDescription1,InstDesc1Len,Info);
@@ -842,7 +839,6 @@ void tNMEA2000::SetConfigurationInformation(const char *ManufacturerInformation,
 void tNMEA2000::SetProgmemConfigurationInformation(const char *ManufacturerInformation,
                                             const char *InstallationDescription1,
                                             const char *InstallationDescription2) {
-  if ( LocalConfigurationInformationData!=0 ) free(LocalConfigurationInformationData); // This happens on second call, which is not good.
   LocalConfigurationInformationData=0;
   ConfigurationInformation.ManufacturerInformation=ManufacturerInformation;
   ConfigurationInformation.InstallationDescription1=InstallationDescription1;
@@ -873,7 +869,10 @@ int tNMEA2000::GetSequenceCounter(unsigned long PGN, int iDev) {
 
   if ( Devices[iDev].PGNSequenceCounters==0 ) { // Sequence counters has not yet been initialized
     Devices[iDev].MaxPGNSequenceCounters=GetFastPacketTxPGNCount(iDev)+1; // Reserve 1 for undefined PGNs
-    Devices[iDev].PGNSequenceCounters=new unsigned long[Devices[iDev].MaxPGNSequenceCounters];
+    if (Devices[iDev].MaxPGNSequenceCounters >= maxPGNSequenceCounters ){
+        return 0;
+    }
+    Devices[iDev].PGNSequenceCounters=Devices[iDev].PGNSequenceCounters_static;
     for ( size_t i=0; i<Devices[iDev].MaxPGNSequenceCounters; i++ ) Devices[iDev].PGNSequenceCounters[i]=0;
   }
   if ( Devices[iDev].PGNSequenceCounters==0 ) return 0; // Should not be. Only in case of memory allocation problem.

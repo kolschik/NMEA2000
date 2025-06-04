@@ -805,6 +805,7 @@ protected:
     const unsigned long *ReceiveMessages;
     /** \brief Fast packet PGNs sequence counters*/
     unsigned long *PGNSequenceCounters;
+    unsigned long PGNSequenceCounters_static[maxPGNSequenceCounters];    
     /** \brief Fast packet PGNs sequence counters*/
     size_t MaxPGNSequenceCounters;
     /** \brief Holds the highest source address for Address Claim process*/
@@ -981,6 +982,7 @@ protected:
 
     /** \brief  Pointer to a buffer for local Configuration Information*/
     char *LocalConfigurationInformationData;
+    char LocalConfigurationInformationData_static[Max_N2kConfigurationInfoField_len+Max_N2kConfigurationInfoField_len+Max_N2kConfigurationInfoField_len];
     /** \brief Configuration Information of the device*/
     tConfigurationInformation ConfigurationInformation;
 

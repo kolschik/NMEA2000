@@ -781,6 +781,7 @@ protected:
     /** \brief This holds all the local (???) Product Informations for this 
      * specific device*/
     tProductInformation *LocalProductInformation;
+    tProductInformation LocalProductInformation_static;
     /** \brief This holds the Manufacturer Code for this 
      * specific device*/
     char *ManufacturerSerialCode;
@@ -973,6 +974,7 @@ protected:
 
     /** \brief  Pointer to a buffer for all internal devices */
     tInternalDevice *Devices;
+    tInternalDevice Devices_array[maxDeviceCount];
     /** \brief  Number of devices */
     int DeviceCount;
 //    unsigned long N2kSource[Max_N2kDevices];
@@ -1013,6 +1015,7 @@ protected:
      *  - \ref tNMEA2000::SetN2kCANMsgBufSize()
     */
     tN2kCANMsg *N2kCANMsgBuf;
+    tN2kCANMsg N2kCANMsgBuf_static[maxN2kCANMsgs];
     /** \brief Size of N2kCANMsgBuf receiving message buffer
      * \sa 
      * - \ref N2kCANMsgBuf
@@ -1033,6 +1036,7 @@ protected:
      * \ref InitCANFrameBuffers(). 
     */
     tCANSendFrame *CANSendFrameBuf;
+    tCANSendFrame CANSendFrameBuf_arr [maxCANSendFrames * maxDeviceCount];
     /** \brief Size of CANSendFrameBuf or before initialization requested
      *         total frame buffering size.
      * 

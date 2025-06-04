@@ -301,7 +301,7 @@ bool IsDefaultSingleFrameMessage(unsigned long PGN) {
                                       case 127501L: // Binary status report, pri=3, period=NA
                                       case 127505L: // Fluid level, pri=6, period=2500
                                       case 127508L: // Battery Status, pri=6, period=1500
-                                      case 127750L: // Charger status new, pri=6, period=1500
+                                      case 127750L: // Charger status New, pri=6, period=1500
                                       case 128259L: // Boat speed, pri=2, period=1000
                                       case 128267L: // Water depth, pri=3, period=1000
                                       case 129025L: // Lat/lon rapid, pri=2, period=100
@@ -712,7 +712,7 @@ tNMEA2000::tNMEA2000() {
   N2kCANMsgBuf=0;
   MaxN2kCANMsgs=0;
 
-  MaxCANSendFrames=40;
+  MaxCANSendFrames=maxCANSendFrames;
   MaxCANReceiveFrames=0; // Use driver default
   CANSendFrameBuf=0;
 
@@ -742,15 +742,15 @@ tNMEA2000::tNMEA2000() {
 
 //*****************************************************************************
 void tNMEA2000::SetDeviceCount(const uint8_t _DeviceCount) {
-  // Note that we can set this only before any initialization. Limit count to 10.
-  if ( Devices==0 && _DeviceCount>=1 && _DeviceCount<10 ) DeviceCount=_DeviceCount;
+  // Note that we can set this only before any initialization. Limit count to maxDeviceCount.
+  if ( Devices==0 && _DeviceCount>=1 && _DeviceCount<=maxDeviceCount ) DeviceCount=_DeviceCount;
 }
 
 //*****************************************************************************
 void tNMEA2000::InitDevices() {
   if ( Devices==0 ) {
     N2kDbgln("Init devices");
-    Devices=new tInternalDevice[DeviceCount];
+    Devices=Devices_array;
     MaxCANSendFrames*=DeviceCount; // We need bigger buffer for sending all information
 //    for (int i=0; i<DeviceCount; i++) Devices[i].tDevice();
     // We set default device information here.
@@ -794,7 +794,7 @@ void tNMEA2000::SetProductInformation(const char *_ModelSerialCode,
   if ( !IsValidDevice(iDev) ) return;
   InitDevices();
   if (Devices[iDev].LocalProductInformation==0) {
-    Devices[iDev].LocalProductInformation=new tProductInformation();
+      Devices[iDev].LocalProductInformation=&Devices[iDev].LocalProductInformation_static;
   }
   Devices[iDev].ProductInformation=Devices[iDev].LocalProductInformation;
   Devices[iDev].LocalProductInformation->Set(_ModelSerialCode,_ProductCode,_ModelID,_SwCode,_ModelVersion,_LoadEquivalency,_N2kVersion,_CertificationLevel);
@@ -1227,7 +1227,7 @@ void tNMEA2000::SetMode(tN2kMode _N2kMode, uint8_t _N2kSource) {
 //*****************************************************************************
 void tNMEA2000::InitCANFrameBuffers() {
     if ( CANSendFrameBuf==0 && !IsInitialized() ) {
-      if ( MaxCANSendFrames>0 ) CANSendFrameBuf = new tCANSendFrame[MaxCANSendFrames];
+      CANSendFrameBuf = CANSendFrameBuf_arr;
       N2kDbg("Initialize frame buffer. Size: "); N2kDbg(MaxCANSendFrames); N2kDbg(", address:"); N2kDbgln((uint32_t)CANSendFrameBuf);
       CANSendFrameBufferWrite=0;
       CANSendFrameBufferRead=0;
@@ -1245,8 +1245,9 @@ bool tNMEA2000::Open() {
     InitDevices();
 
     if ( N2kCANMsgBuf==0 ) {
-      if ( MaxN2kCANMsgs==0 ) MaxN2kCANMsgs=5;
-      N2kCANMsgBuf = new tN2kCANMsg[MaxN2kCANMsgs];
+      if ( MaxN2kCANMsgs==0 ) MaxN2kCANMsgs=maxN2kCANMsgs;
+
+      N2kCANMsgBuf = N2kCANMsgBuf_static;
       for (int i=0; i<MaxN2kCANMsgs; i++) N2kCANMsgBuf[i].FreeMessage();
 
       #if !defined(N2K_NO_GROUP_FUNCTION_SUPPORT)

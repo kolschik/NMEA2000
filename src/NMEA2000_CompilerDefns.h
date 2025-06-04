@@ -41,6 +41,9 @@
 #ifndef _NMEA2000_COMPILER_DEFNS_H_
 #define _NMEA2000_COMPILER_DEFNS_H_
 
+#define maxDeviceCount 2
+#define maxCANSendFrames 40
+#define maxN2kCANMsgs 5
 /***********************************************************************//**
  * \brief Deactivation of ISO Multipacket Support 
  * ISO Multipacket is an other way to send long messages instead of
